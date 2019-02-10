@@ -96,10 +96,9 @@ bool QWordCompleter::eventFilter(QObject *o, QEvent *e)
 
 //* // CTRL + SPACE - VERSION // QTextEdit
 
-	bool isEditHidden = false;
-
 	if(widget()->inherits("QTextEdit") && e->type() == QEvent::KeyPress)
 	{
+		bool isEditHidden = false;
 		QKeyEvent* kEv = static_cast<QKeyEvent*> (e);
 		switch(kEv->key())
 		{
