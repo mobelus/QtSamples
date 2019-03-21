@@ -23,10 +23,11 @@ https://github.com/wixtoolset/wix3/releases/tag/wix3104rtm
 	QString str;
 
 	// Version 1
-	str = "some %5%25 random %37 text";
+	str = "some %5987%239 random %66 text";
 	for(int i=0; i<3; ++i)
 	{
 		str = str.arg( QString::number( (i+1)*10 ) );
+		// returns "some 1020 random 30 text"
 	}
 	
 	// Version 2
@@ -34,6 +35,7 @@ https://github.com/wixtoolset/wix3/releases/tag/wix3104rtm
 	for(int i=0; i<3; ++i)
 	{
 		QString argNum = "%"+QString::number(i+1);
-		str = str.arg(argNum).arg( QString::number( (i+1)*10 ) );    // returns "Hellof %2"
+		str = str.arg(argNum).arg( QString::number( (i+1)*10 ) );
+		// returns "some 10 random 20 text 30 a 30 b 10 c 20 d finish"
 	}
 
