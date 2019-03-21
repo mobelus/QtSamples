@@ -17,3 +17,23 @@ https://marketplace.visualstudio.com/items?itemName=RobMensching.WixToolsetVisua
 
 https://github.com/wixtoolset/wix3/releases/tag/wix3104rtm
 
+
+# qstring arg multiple times in a circle
+
+	QString str;
+
+	// Version 1
+	str = "some %5%25 random %37 text";
+	for(int i=0; i<3; ++i)
+	{
+		str = str.arg( QString::number( (i+1)*10 ) );
+	}
+	
+	// Version 2
+	str = "some %1 random %2 text %3 a %3 b %1 c %2 d finish";
+	for(int i=0; i<3; ++i)
+	{
+		QString argNum = "%"+QString::number(i+1);
+		str = str.arg(argNum).arg( QString::number( (i+1)*10 ) );    // returns "Hellof %2"
+	}
+
