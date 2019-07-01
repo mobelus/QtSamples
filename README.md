@@ -42,11 +42,14 @@ https://github.com/wixtoolset/wix3/releases/tag/wix3104rtm
 
 # QDir create for DEBUG
 
+```
 QDateTime dt = QDateTime::currentDateTime();
 QDir dr; dr.mkdir("C:/Users/Public/test/" + dt.toString("dd-MM-yyyy-hh-mm-ss-z"));
+```
 
 # QFile create for DEBUG
 
+```
 {
 	QDateTime dt = QDateTime::currentDateTime();
 	QString sdt = dt.toString("dd_MM_yyyy_hh_mm_ss_z");
@@ -75,6 +78,6 @@ void writeStrToFile(QString scriptTetx, QString fileName)
 		scriptFile.close();
 	}
 }
-
+```
 
 
