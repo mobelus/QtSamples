@@ -39,3 +39,42 @@ https://github.com/wixtoolset/wix3/releases/tag/wix3104rtm
 		// returns "some 10 random 20 text 30 a 30 b 10 c 20 d finish"
 	}
 
+
+# QDir create for DEBUG
+
+QDateTime dt = QDateTime::currentDateTime();
+QDir dr; dr.mkdir("C:/Users/Public/test/" + dt.toString("dd-MM-yyyy-hh-mm-ss-z"));
+
+# QFile create for DEBUG
+
+{
+	QDateTime dt = QDateTime::currentDateTime();
+	QString sdt = dt.toString("dd_MM_yyyy_hh_mm_ss_z");
+	sdt = sdt.append(".txt");
+
+	QString file = "C:/test/_/" + sdt;
+
+	writeStrToFile("1", file);
+	writeStrToFile("2", file);
+	writeStrToFile("3", file);
+}
+
+void writeStrToFile(QString scriptTetx, QString fileName)
+{
+	std::string s = fileName.toStdString();
+
+	QFile scriptFile(fileName);
+	if (scriptFile.open(QIODevice::ReadWrite))
+	{
+		// Save the script
+		QTextStream outputStream(&scriptFile);
+		QString code = scriptTetx;
+		code = code.append("\n");
+		outputStream.seek(outputStream.readAll().size());
+		outputStream << code;
+		scriptFile.close();
+	}
+}
+
+
+
