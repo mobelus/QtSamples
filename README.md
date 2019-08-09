@@ -80,4 +80,17 @@ void writeStrToFile(QString scriptTetx, QString fileName)
 }
 ```
 
+# QJSEngine - setObjectOwnership
+
+```
+	QJSEngine _scriptEngine(this);
+	// Register objects for access from script
+	QJSValue svApi = _scriptEngine.newQObject(this);
+	_scriptEngine.globalObject().setProperty("api", svApi);
+
+	// all cpp objects that were passed to QJSEngine or QQmlEngine will be destroy by context of these object.
+	// Without this call destuctor of ScriptInterface will be called 2 times - by EmulatorUiApplication and ScriptEngine;
+	QQmlEngine::setObjectOwnership(this, QQmlEngine::CppOwnership);
+```	
+	
 
