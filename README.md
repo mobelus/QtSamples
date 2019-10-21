@@ -92,5 +92,14 @@ void writeStrToFile(QString scriptTetx, QString fileName)
 	// Without this call destuctor of ScriptInterface will be called 2 times - by EmulatorUiApplication and ScriptEngine;
 	QQmlEngine::setObjectOwnership(this, QQmlEngine::CppOwnership);
 ```	
+
+# QString - smal guide
 	
+```
+    QString s("1234567890");
+    s = s.mid(3, s.length() - 3); // all after first 3
+    s = s.left(3); // first 3
+    s = s.right(3); // last 3
+```
+
 
