@@ -132,3 +132,88 @@ findTrainNumberNumberInContainer( QVector<StationScheduleInfo>& vec, int trainNu
 	countStops = std::count_if(vec.begin(), vec.end(), [&](StationScheduleInfo elem) { return elem.trainNum() == trainNumber; });
 	return countStops > 0;
 ```
+
+
+# BEFORE REVIEW
+
+```
+
+QVariant StationScheduleTableModel::data(const QModelIndex & index, int role) const
+{
+	if (index.isValid())
+	{
+		int irow = index.row();
+		int cnt = _itemsShown.count();
+
+		if (irow < 0 || irow >= cnt)
+			return QVariant();
+
+		const StationScheduleInfo &item = _itemsShown[irow];
+
+		switch (role)
+		{
+		case TrainNumberRole:
+		{
+			if (irow % _distanceNum == 0)
+				return item.trainNum();
+		}
+		break;
+		case StationIdRole:
+			return item.stationId();
+		case StationNameRole:
+			return item.stationName();
+		case ArivalTimeRole:
+			return item.arivalTimeString();
+		case DepartureTimeRole:
+			return item.departureTimeString();
+		default:
+			return QVariant();
+		}
+	}
+
+	return QVariant();
+}
+
+```
+
+# AFTER REVIEW
+
+```
+	QVariant result;
+	if (index.isValid())
+	{
+		int irow = index.row();
+		int cnt = _itemsShown.count();
+
+		if (irow < 0 || irow >= cnt)
+			return QVariant();
+
+		const StationScheduleInfo &item = _itemsShown[irow];
+
+		switch (role)
+		{
+		case TrainNumberRole:
+		{
+			if (irow % _distanceNum == 0)
+				result = item.trainNum();
+		}
+		break;
+		case StationIdRole:
+			result = item.stationId();
+			break;
+		case StationNameRole:
+			result = item.stationName();
+			break;
+		case ArivalTimeRole:
+			result = item.arivalTimeString();
+			break;
+		case DepartureTimeRole:
+			result = item.departureTimeString();
+			break;
+		default: break;
+		}
+	}
+
+	return result;
+	
+```
