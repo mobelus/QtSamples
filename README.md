@@ -100,6 +100,35 @@ void writeStrToFile(QString scriptTetx, QString fileName)
     s = s.mid(3, s.length() - 3); // all after first 3
     s = s.left(3); // first 3
     s = s.right(3); // last 3
+    
 ```
 
 
+## OLD find function version - NO ALGO used
+
+
+```
+findTrainNumberNumberInContainer( QVector<StationScheduleInfo>& vec, int trainNumber, int& countStops)
+{
+	bool isNumberFound = false;
+	for (auto a : vec)
+	{
+		if (countStops > 0 && !isNumberFound)
+			return true;
+
+		isNumberFound = (a.trainNum() == trainNumber);
+		if (isNumberFound)
+			countStops++;
+	}
+
+	return false;
+}
+
+```
+
+## NEW find function version - USING  ALGORUTHM
+
+```
+	countStops = std::count_if(vec.begin(), vec.end(), [&](StationScheduleInfo elem) { return elem.trainNum() == trainNumber; });
+	return countStops > 0;
+```
