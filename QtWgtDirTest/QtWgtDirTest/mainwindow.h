@@ -15,6 +15,8 @@ public:
 	explicit MainWindow(QWidget *parent = nullptr);
 	~MainWindow();
 
+	void createNewDir(QString s);
+
 private slots:
 	void on_pushButton_clicked();
 
