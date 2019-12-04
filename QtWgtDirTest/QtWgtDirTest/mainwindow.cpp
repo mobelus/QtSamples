@@ -3,6 +3,12 @@
 #include <QDir>
 #include <QDateTime>
 
+void MainWindow::createNewDir(QString s)
+{
+	QDateTime dt0 = QDateTime::currentDateTime();
+	QDir dr0; dr0.mkdir("C:/Users/Public/test/_" + dt0.toString("dd_MM_yyyy_hh_mm_ss_z") + s /*"_showChosen"*/ );
+}
+
 MainWindow::MainWindow(QWidget *parent) :
 	QMainWindow(parent),
 	ui(new Ui::MainWindow)
