@@ -217,3 +217,89 @@ QVariant StationScheduleTableModel::data(const QModelIndex & index, int role) co
 	return result;
 	
 ```
+
+
+
+# **Разработка веб-приложений с использованием QML и Qt для WebAssembly**
+
+ **Установка и настройка.**
+
+Нужно сделать две вещи: настроить компилятор Emscripten и Qt для веб-сборки.
+
+**Emscripten**
+
+на Linux:
+
+​			`# fetch Emscripten SDK and install target version`
+
+​			`git clone https://github.com/emscripten-core/emsdk.git`
+
+​			`cd emsdk`
+
+​			`./emsdk install sdk-1.38.30-64bit`
+
+​			`./emsdk activate --embedded sdk-1.38.30-64bit`
+
+​			`source emsdk_env.sh`
+
+Обратите внимание, что 1.38.30 рекомендуется для сборки, не экспериментируйте с другими сборками, так как у них будут проблемы.
+
+Исходный код `emsdk_env.sh` важен для настройки правильной среды *Emscripten*, поэтому не забывайте запускать ее <u>(каждый раз, когда вы открываете новый терминал</u>)
+
+ 
+
+**Qt WebAssembly**
+
+Это еще проще. Загрузите установщик [Qt со страницы загрузки Qt](https://www.qt.io/download) или откройте существующий [инструмент Qt Maintenance,](https://doc.qt.io/qt-5/gettingstarted.html#updating-or-removing-qt) если он у вас уже установлен.
+
+В обоих случаях вам просто нужно выбрать Qt для WebAssembly, в версии Qt  от 5.13.2.
+
+ 
+
+![https://miro.medium.com/max/1633/1*XF9KMNHHaFMSjoUS6FbNpA.jpeg](file:///C:/Users/IGOR~1.SHA/AppData/Local/Temp/msohtmlclip1/01/clip_image004.jpg)
+
+Установка Qt WebAssembly
+
+
+
+# Привет WebAssembly
+
+ Перейдите к вашему проекту и создайте `build `каталог.  Затем просто вызовите новый `qmake `с поддержкой WebAssembly:
+
+​			`cd /path-to-hello-webassembly-project` - преход в дирректорию проекта
+
+​			`mkdir build && cd build` - создание папки `build` и переход в неё
+
+​			`/path-to-hello-webassembly/5.13.2/wasm_32/bin/qmake ..` - компилирует проект
+
+​			`make`
+
+После того, как это будет сделано, вы получите один из файлов в вашем каталоге сборки -  projectname.html. Чтобы запустить его в браузере, нам нужен, как обычно, веб-сервер. Вы можете использовать все, что захотите, для обслуживания этих статических файлов, но есть также удобный инструмент командной строки emrun, который вы можете использовать для этой цели, поскольку он уже доступен как часть среды Emscripten.
+
+ 
+
+Итак, чтобы открыть наше приложение в браузере Firefox, можно сделать:
+
+​			`emrun --browser=firefox *.html`
+
+ 
+
+**<u>Пример из dev-shaldunov:</u>**
+
+1. Выполняем из /home/user/emsdk:
+
+​			`./emsdk activate --embadded sdk-1.38.30-64bit`
+
+2. ​	`source emsdk_env.sh`
+3.  Создаем папку `build` в корне проекта: /mywebassembly/build:
+4.    `/opt/Qt/5.13.2/wasm_32/bin/qmake ..`
+5. ​    `make` 
+
+6. Чтобы открыть наше приложение в браузере Firefox, можно сделать:
+
+   `emrun --browser=firefox *.html`
+
+   
+
+   P.S.: Более подробное описание Вы можете найти на: https://itnext.io/developing-web-apps-using-qml-and-qt-for-webassembly-aa84453f2f61
+   
