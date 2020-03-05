@@ -17,6 +17,25 @@ https://marketplace.visualstudio.com/items?itemName=RobMensching.WixToolsetVisua
 
 https://github.com/wixtoolset/wix3/releases/tag/wix3104rtm
 
+# QMessageBox
+
+### QMessageBox BAD:
+```
+QMessageBox msg;
+    msg.setWindowTitle(tr("Invalid variable value"));
+    msg.setText(tr("Unable to convert Variant value to int state"));
+    msg.exec();
+```
+
+https://doc.qt.io/qt-5/qdialog.html#exec
+
+### QMessageBox GOOD:
+```
+QMessageBox::warning(nullptr, "Warning", "Macros recording wasn't stopped!\n Stop recording the macros and try again.", "Ok");
+QMessageBox::critical(this, "Error", error);
+QMessageBox::about(this, tr("About program"), aboutMessage);
+
+```
 
 # qstring arg multiple times in a circle
 
