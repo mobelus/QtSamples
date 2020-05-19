@@ -110,7 +110,7 @@ void writeStrToFile(QString scriptTetx, QString fileName)
 	// all cpp objects that were passed to QJSEngine or QQmlEngine will be destroy by context of these object.
 	// Without this call destuctor of ScriptInterface will be called 2 times - by EmulatorUiApplication and ScriptEngine;
 	QQmlEngine::setObjectOwnership(this, QQmlEngine::CppOwnership);
-```	
+```
 
 # QString - smal guide
 	
@@ -153,44 +153,95 @@ findTrainNumberNumberInContainer( QVector<StationScheduleInfo>& vec, int trainNu
 ```
 
 
+### Center Coordinates for dialog
+```
+void GetCenterCoordsForDlg(QRect dlgLoginSize)
+{
+	// QListIterator<QScreen*> it(qApp->screens());
+	// QScreen* firstScreen = qApp->screens().at(0);
+	// QRect rct = (firstScreen)->geometry();
+	// int sumWidth = rct.width();
+	// while (it.hasNext())
+	// {
+	// 	QScreen *singleScreen = it.next();
+	// 	sumWidth += singleScreen->geometry().width();
+	// }
+
+	QRect resultRect;
+
+	QRect mainWindowRect = this->geometry();
+	QListIterator<QScreen*> it(qApp->screens());
+	QScreen* firstScreen = qApp->screens().at(0);
+	QRect rct = (firstScreen)->geometry();
+	int sumWidth = rct.width();
+	// Show login dialog upon top-left x coordinate
+	//int appWindowXposition = this->x();
+	// Show login dialog upon coordinates of the center of the application window
+	int appWindowXposition = this->x() + this->width() / 2;
+	while (it.hasNext())
+	{
+		QScreen *singleScreen = it.next();
+		QRect screenRect = singleScreen->geometry();
+		int lastFoundScreenWidth = screenRect.width();
+
+		if (appWindowXposition < sumWidth)
+		{
+			auto height = qMin(dlgLoginSize.height(), screenRect.height());
+			auto width = qMin(dlgLoginSize.width(), screenRect.width());
+			auto x = (screenRect.width() - width) / 2;	// center
+			x += (sumWidth - lastFoundScreenWidth);		// center + step to right on all of the screens that we have met before
+			auto y = (screenRect.height() - height) / 2;
+
+			resultRect = QRect(x, y, width, height);
+			qApp->sendCenterCoordsForDlg(resultRect);
+		}
+		else
+		{
+			sumWidth += screenRect.width();
+		}
+	}
+
+}
+```
+
 # BEFORE REVIEW
 
 ```
 
 QVariant StationScheduleTableModel::data(const QModelIndex & index, int role) const
 {
-	if (index.isValid())
-	{
-		int irow = index.row();
-		int cnt = _itemsShown.count();
+  if (index.isValid())
+  {
+    int irow = index.row();
+    int cnt = _itemsShown.count();
 
-		if (irow < 0 || irow >= cnt)
-			return QVariant();
+    if (irow < 0 || irow >= cnt)
+    	return QVariant();
 
-		const StationScheduleInfo &item = _itemsShown[irow];
+    const StationScheduleInfo &item = _itemsShown[irow];
 
-		switch (role)
-		{
-		case TrainNumberRole:
-		{
-			if (irow % _distanceNum == 0)
-				return item.trainNum();
-		}
-		break;
-		case StationIdRole:
-			return item.stationId();
-		case StationNameRole:
-			return item.stationName();
-		case ArivalTimeRole:
-			return item.arivalTimeString();
-		case DepartureTimeRole:
-			return item.departureTimeString();
-		default:
-			return QVariant();
-		}
-	}
+    switch (role)
+    {
+    case TrainNumberRole:
+    {
+    	if (irow % _distanceNum == 0)
+    		return item.trainNum();
+    }
+    break;
+    case StationIdRole:
+    	return item.stationId();
+    case StationNameRole:
+    	return item.stationName();
+    case ArivalTimeRole:
+    	return item.arivalTimeString();
+    case DepartureTimeRole:
+    	return item.departureTimeString();
+    default:
+    	return QVariant();
+    }
+  }
 
-	return QVariant();
+  return QVariant();
 }
 
 ```
@@ -198,43 +249,42 @@ QVariant StationScheduleTableModel::data(const QModelIndex & index, int role) co
 # AFTER REVIEW
 
 ```
-	QVariant result;
-	if (index.isValid())
-	{
-		int irow = index.row();
-		int cnt = _itemsShown.count();
+  QVariant result;
+  if (index.isValid())
+  {
+    int irow = index.row();
+    int cnt = _itemsShown.count();
 
-		if (irow < 0 || irow >= cnt)
-			return QVariant();
+    if (irow < 0 || irow >= cnt)
+    	return QVariant();
 
-		const StationScheduleInfo &item = _itemsShown[irow];
+    const StationScheduleInfo &item = _itemsShown[irow];
 
-		switch (role)
-		{
-		case TrainNumberRole:
-		{
-			if (irow % _distanceNum == 0)
-				result = item.trainNum();
-		}
-		break;
-		case StationIdRole:
-			result = item.stationId();
-			break;
-		case StationNameRole:
-			result = item.stationName();
-			break;
-		case ArivalTimeRole:
-			result = item.arivalTimeString();
-			break;
-		case DepartureTimeRole:
-			result = item.departureTimeString();
-			break;
-		default: break;
-		}
-	}
+    switch (role)
+    {
+    case TrainNumberRole:
+    {
+    	if (irow % _distanceNum == 0)
+    		result = item.trainNum();
+    }
+    break;
+    case StationIdRole:
+    	result = item.stationId();
+    	break;
+    case StationNameRole:
+    	result = item.stationName();
+    	break;
+    case ArivalTimeRole:
+    	result = item.arivalTimeString();
+    	break;
+    case DepartureTimeRole:
+    	result = item.departureTimeString();
+    	break;
+    default: break;
+    }
+  }
 
-	return result;
-	
+  return result;
 ```
 
 
@@ -249,23 +299,17 @@ QVariant StationScheduleTableModel::data(const QModelIndex & index, int role) co
 
 на Linux:
 
-​			`# fetch Emscripten SDK and install target version`
-
-​			`git clone https://github.com/emscripten-core/emsdk.git`
-
-​			`cd emsdk`
-
-​			`./emsdk install sdk-1.38.30-64bit`
-
-​			`./emsdk activate --embedded sdk-1.38.30-64bit`
-
-​			`source emsdk_env.sh`
+- `# fetch Emscripten SDK and install target version`
+- `git clone https://github.com/emscripten-core/emsdk.git`
+- `cd emsdk`
+- `./emsdk install sdk-1.38.30-64bit`
+- `./emsdk activate --embedded sdk-1.38.30-64bit`
+- `source emsdk_env.sh`
 
 Обратите внимание, что 1.38.30 рекомендуется для сборки, не экспериментируйте с другими сборками, так как у них будут проблемы.
 
 Исходный код `emsdk_env.sh` важен для настройки правильной среды *Emscripten*, поэтому не забывайте запускать ее <u>(каждый раз, когда вы открываете новый терминал</u>)
 
- 
 
 **Qt WebAssembly**
 
@@ -283,36 +327,30 @@ QVariant StationScheduleTableModel::data(const QModelIndex & index, int role) co
 
 # Привет WebAssembly
 
- Перейдите к вашему проекту и создайте `build `каталог.  Затем просто вызовите новый `qmake `с поддержкой WebAssembly:
+Перейдите к вашему проекту и создайте `build `каталог.  Затем просто вызовите новый `qmake `с поддержкой WebAssembly:
 
-​			`cd /path-to-hello-webassembly-project` - преход в дирректорию проекта
-
-​			`mkdir build && cd build` - создание папки `build` и переход в неё
-
-​			`/path-to-hello-webassembly/5.13.2/wasm_32/bin/qmake ..` - компилирует проект
-
-​			`make`
+- `cd /path-to-hello-webassembly-project` - преход в дирректорию проекта
+- `mkdir build && cd build` - создание папки `build` и переход в неё
+- `/path-to-hello-webassembly/5.13.2/wasm_32/bin/qmake ..` - компилирует проект
+- `make`
 
 После того, как это будет сделано, вы получите один из файлов в вашем каталоге сборки -  projectname.html. Чтобы запустить его в браузере, нам нужен, как обычно, веб-сервер. Вы можете использовать все, что захотите, для обслуживания этих статических файлов, но есть также удобный инструмент командной строки emrun, который вы можете использовать для этой цели, поскольку он уже доступен как часть среды Emscripten.
 
- 
-
 Итак, чтобы открыть наше приложение в браузере Firefox, можно сделать:
 
-​			`emrun --browser=firefox *.html`
-
+- `emrun --browser=firefox *.html`
  
 
 **<u>Пример из dev-shaldunov:</u>**
 
 1. Выполняем из /home/user/emsdk:
 
-​			`./emsdk activate --embadded sdk-1.38.30-64bit`
+     `./emsdk activate --embadded sdk-1.38.30-64bit`
 
-2. ​	`source emsdk_env.sh`
+2. `source emsdk_env.sh`
 3.  Создаем папку `build` в корне проекта: /mywebassembly/build:
-4.    `/opt/Qt/5.13.2/wasm_32/bin/qmake ..`
-5. ​    `make` 
+4. `/opt/Qt/5.13.2/wasm_32/bin/qmake ..`
+5. `make` 
 
 6. Чтобы открыть наше приложение в браузере Firefox, можно сделать:
 
