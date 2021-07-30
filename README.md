@@ -59,6 +59,33 @@ QMessageBox::about(this, tr("About program"), aboutMessage);
 	}
 
 
+# QFile .open() correct error handling 
+
+```
+QString flName;
+QFile fl(flName); // exists / permission denied / other process busy
+QString error;
+if(fl.exists())
+{
+    if(fl.open(QIODevice::ReadOnly))
+    {
+        QByteArray block = fl.read(10);
+        fl.write(block);
+        fl.close();
+    }
+    else
+    {
+        error = QString("File: %1 Error: %2").arg(flName).arg(fl.errorString());
+    }
+}
+else
+{
+    error = "File does not exist";
+}
+
+```
+
+
 # QDir create for DEBUG
 
 ```
