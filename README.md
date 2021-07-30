@@ -59,7 +59,7 @@ QMessageBox::about(this, tr("About program"), aboutMessage);
 	}
 
 
-# QFile .open() correct error handling 
+# QFile .open() correct error handling file.errorString()
 
 ```
 QString flName;
