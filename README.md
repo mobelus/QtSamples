@@ -17,6 +17,19 @@ https://marketplace.visualstudio.com/items?itemName=RobMensching.WixToolsetVisua
 
 https://github.com/wixtoolset/wix3/releases/tag/wix3104rtm
 
+# Почему не стоит использовать qobject_cast<MyClass*>(sender())
+
+- Этот метод помечен qt как deprecated
+- В многопоточных системах с sender() есть проблема:
+sender() - вовзвращает отправителя - Последний испустивший сигнал объект
+И если повезёт, то sender() - вернёт нам того объекта отправителя сигнала какого нам надо
+А если не повезёт, то sender() - вернёт нам последнего, который будет СОВСЕМ НЕ тот кого мы ожидаем
+```
+MyClass *senderMy   = qobject_cast<MyClass*>(sender());
+bool    isSenderMy = (senderMy != nullptr);
+```
+    
+
 # QMessageBox
 
 ### QMessageBox BAD:
