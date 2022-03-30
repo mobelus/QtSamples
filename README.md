@@ -162,8 +162,82 @@ void writeStrToFile(QString scriptTetx, QString fileName)
     
 ```
 
+### SELECT BIG Data from a Large Table CORREC Solution:
 
-## OLD find function version - NO ALGO used
+```
+    //
+    // canFetchMore() + fetchMore() approach
+    //
+    
+    while (mModel->canFetchMore())
+        mModel->fetchMore();
+    int totalRows = mModel->rowCount();
+    
+    for (int row = 0; row < totalRows; ++row) {
+        for (int col = 0; col < mModel.columnCount(); ++col) {
+            out << mModel->index(row, col).data().toString() << mFieldDelimeter;
+        }
+        out << EOL;
+    }
+
+```
+
+### SELECT BIG Data from a Large Table BAD Solution:
+
+```
+#include <QSqlQueryModel>
+#include <QSqlDatabase>
+#include <QSqlQuery>
+#include <QSqlRecord>
+#include <QSqlError>
+
+
+	int rows = model->rowCount();
+        int cols = model->columnCount();
+        bool modelShowsAllRecords = !mModel->canFetchMore();
+        
+        if (modelShowsAllRecords) {
+            for (int row = 0; row < rowCnt; ++row) {
+                for (int col = 0; col < colCnt; ++col) {
+                    out << mModel->index(row, col).data().toString() << mFieldDelimeter;
+                }
+                out << EOL;
+            }
+        }
+        else {
+            QSqlQuery query(mModel->query());
+            bool      table_ok = query.exec();
+
+            if (!table_ok) {
+                QString sqlError("Error from SystemEventLogTable: " + query.lastError().text());
+                qDebug() << sqlError;
+                return ExportError(QString("Export to file error: %1").arg(sqlError));
+            }
+            else {
+                // Only way to get a row count, size() method in QSqlQuery class
+                // does not work for SQLite3
+                query.last();
+                int rowFullCount = query.at() + 1;
+                if (rowCnt != rowFullCount)
+                    rowCnt = rowFullCount;
+            }
+
+            if (rowCnt != 0) {
+                query.first(); // return to first row
+                do {
+                    for (int col = 0; col < colCnt; ++col) {
+                        out << query.value(col).toString() << mFieldDelimeter;
+                    }
+                    out << EOL;
+                } while (query.next());
+            }
+        }
+
+        return Result<void>::ok();
+```
+	
+
+### OLD find function version - NO ALGO used
 
 
 ```
