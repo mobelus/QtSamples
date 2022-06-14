@@ -72,6 +72,18 @@ QMessageBox::about(this, tr("About program"), aboutMessage);
 	}
 
 
+# tr("your cool text") => ???? ?????? ?????
+
+PROBLEM: Sometimes we get **???? ???? ???** on the place of our translated text.
+Mostly It happends when we translate from English to Any Unicode Language.
+
+setText(QCoreApplication::translate("Text", text.toLocal8Bit()));
+
+### toLocal8Bit() can cause this problem
+
+Use instead of toLocal8Bit() <---> toUtf8()
+
+
 # QFile .open() correct error handling file.errorString()
 
 ```
