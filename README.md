@@ -97,7 +97,7 @@ class Abstraction : public SignalsSlots
 {...
 ```
 	
-**Pimpl**
+**Pimpl** 
 https://stackoverflow.com/questions/12294981/interfaces-with-template-methods
 
 
