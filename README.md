@@ -78,7 +78,7 @@ https://stackoverflow.com/questions/4397478/qt-templated-q-object-class
 
 **PROBLEM**: It is not possible to mix template and Q_OBJECT 
 
-*SOLUTION 2*: If you have a subset of types you can list the slots and signals like this:
+**SOLUTION 2**: If you have a subset of types you can list the slots and signals like this:
 ```
 class SignalsSlots : public QObject
 {
