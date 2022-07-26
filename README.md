@@ -28,7 +28,79 @@ sender() - вовзвращает отправителя - Последний и
 MyClass *senderMy   = qobject_cast<MyClass*>(sender());
 bool    isSenderMy = (senderMy != nullptr);
 ```
-    
+
+# Шаблоны и Qt / Q_OBJECT + template<class T> 
+
+https://dolzhenko.blogspot.com/2008/10/qt-usage-c-templates-with-qobject.html
+	
+**PROBLEM**: Using the Meta-Object Compiler (moc):
+moc doesn't create moc class (qt meta info for class) for follow class declaration:
+```
+template <class T>
+class SomeWidget : public SomeSubWidget {
+ Q_OBJECT
+public:
+ SomeWidget(QWidget *parent = 0): SomeSubWidget(parent){
+ }
+ // for instance, wrap T class
+protected:
+ virtual T* component(QWidget *parent = 0) { return new T(parent); }
+
+ T *widget;
+};
+```
+
+
+**Solution**: devide class for two classes - with Q_OBJECT declaration and with template:
+create sub class with Q_OBJECT
+```
+class SomeSubWidget : public QWidget
+{
+ Q_OBJECT
+public:
+ SomeSubWidget(QWidget *parent = 0):QWidget(parent){}
+};
+```
+
+and when inherit it and add template:
+```
+template <class T> class SomeWidget : public SomeSubWidget
+{
+public:
+ SomeWidget(QWidget *parent = 0): SomeSubWidget(parent) { } // for instance, wrap T class
+protected:
+ virtual T* component(QWidget *parent = 0) { return new T(parent); }
+ T *widget;
+};
+```
+
+https://stackoverflow.com/questions/4397478/qt-templated-q-object-class
+
+**PROBLEM**: It is not possible to mix template and Q_OBJECT 
+
+*SOLUTION 2*: If you have a subset of types you can list the slots and signals like this:
+```
+class SignalsSlots : public QObject
+{
+  Q_OBJECT
+  public:
+    explicit SignalsSlots(QObject *parent = 0) :
+    QObject(parent) { }
+  public slots:
+    virtual void writeAsync(int value) { }
+  signals:
+    void readAsynkPolledChanged(int value);
+};
+...
+template <class T>
+class Abstraction : public SignalsSlots
+{...
+```
+	
+**Pimpl**
+https://stackoverflow.com/questions/12294981/interfaces-with-template-methods
+
+
 
 # QMessageBox
 
