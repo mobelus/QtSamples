@@ -101,6 +101,39 @@ class Abstraction : public SignalsSlots
 https://stackoverflow.com/questions/12294981/interfaces-with-template-methods
 
 
+# QScroller::grabGesture + QScrollerProperties
+- QScroller::grabGesture(ui->tableView, QScroller::LeftMouseButtonGesture);
+- Approach with QScrollerProperties using the scroller obj.
+- setTableScrollerNonDragableProperties<QTreeView>(ui->treeViewTable);
+
+```
+#include <QTreeView>
+#include <QScroller>
+#include <QScrollerProperties>
+
+template <class H>
+void setTableScrollerNonDragableProperties(H *table)
+{
+    QScroller *scrol = QScroller::scroller(table);
+    // (*) What this part of code does:
+    // When you are at the top and scroll down realy fast on the table with your finger gesture
+    // When bable comes to the end it will Drag (move a bit under the visible bottom and return to the top again)
+    // To make the table just move down to the end and then simply Stop without dragging and stop at the bottom
+    // we prepare QScrollerProperties scrprop; with following parameters:
+
+    QScrollerProperties scrprop;
+    QVariant overshootPolicy = QVariant::fromValue<QScrollerProperties::OvershootPolicy>(QScrollerProperties::OvershootAlwaysOff);
+    scrprop.setScrollMetric(QScrollerProperties::VerticalOvershootPolicy, overshootPolicy);
+    scrprop.setScrollMetric(QScrollerProperties::HorizontalOvershootPolicy, overshootPolicy);
+    scrprop.setScrollMetric(QScrollerProperties::DragStartDistance, 0.001);
+    scrprop.setScrollMetric(QScrollerProperties::DragStartDistance, 0.001);
+
+    scrol->setScrollerProperties(scrprop);
+
+    scrol->grabGesture(table, QScroller::LeftMouseButtonGesture);
+}
+
+```
 
 # QMessageBox
 
