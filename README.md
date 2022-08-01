@@ -135,6 +135,18 @@ void setTableScrollerNonDragableProperties(H *table)
 
 ```
 
+# QString s; s.arg().arg()... <=> QStringList
+
+```
+QStringList listProxy;
+listProxy.append("Z");
+listProxy.append("X");
+listProxy.append("Y");
+QString funcProxy = "a'%1'b'%2'c'%3'"; // a'Z'b'X'c'Y'
+for (int i = 0; i < listProxy.size(); ++i)
+    funcProxy.replace(QString("%%1").arg(i + 1), listProxy.at(i));
+```
+
 # QMessageBox
 
 ### QMessageBox BAD:
