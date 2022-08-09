@@ -530,6 +530,62 @@ QVariant StationScheduleTableModel::data(const QModelIndex & index, int role) co
   return result;
 ```
 
+```
+{
+    connect(ui->slider, &QSlider::valueChanged, this, &A::onSetValue);
+    connect(ui->stepLeftButton, &QPushButton::clicked, this, &A::onMoveStepLeft);
+    connect(ui->stepRightButton, &QPushButton::clicked, this, &A::onMoveStepRight);
+    ui->slider->setValue(settings->value());
+    ui->label->setText(QString::number(settings->laserValue()));
+
+    ui->slider->setSingleStep(STEP);
+    ui->slider->setPageStep(STEP);
+    ui->slider->setTickInterval(STEP);
+}
+void A::onSetValue(int v)
+{
+    int res = std::round(v / STEP) * STEP;
+    ui->slider->setValue(res);
+    settings->setValue(res);
+    ui->label->setText(QString::number(res));
+}
+void A::onMoveStepLeft()
+{
+    doMoveStep(true);
+}
+void A::onMoveStepRight()
+{
+    doMoveStep(false);
+}
+
+void A:doMoveStep(bool isleft)
+{
+    int v   = ui->slider->value();
+    auto mi = ui->slider->minimum();
+    auto ma = ui->slider->maximum();
+    auto s  = STEP;
+
+    for (int i = mi, l, r; i < ma; i += s) {
+        l  = i;
+        r = l + s;
+        if (v >= l && v <= r) {
+            if (l == v && v >= m) {
+                v = isleft ? (l - s) : (l + s);
+                break;
+            }
+            else if (r == v && v <= ma) {
+                v = isLeft ? (r - s) : (r + s);
+                break;
+            }
+            else if (v > l && v < r) {
+                val = isleft ? l : r;
+                break;
+            }
+        }
+    }
+    ui->slider->setValue(v);
+}
+```
 
 
 # **Разработка веб-приложений с использованием QML и Qt для WebAssembly**
