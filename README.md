@@ -958,3 +958,43 @@ v1.erase(v1.begin() + 7, v1.end());
 Далее UB (undefined behavior) Вероятнее всего вызовется метод самого базового класса, если тот определён, иначе ... вопрос.
 
 ===================================================================
+	
+## PATTERN PATTERNS ШАБЛОНЫ ПРОЕКТИРОВАНИЯ СИСТЕМНЫЙ ДИЗАЙН ПАТТЕРНЫ
+	
+**CONS in general: OVERENGENEERING**
+
+- **Abstract Factory** - Lets you produce families of related objects without specifying their concrete classes.
+- **Builder** - Lets you construct complex objects step by step. The pattern allows you to produce different types and representations of an object using the same construction code.
+- **Factory Method** - Provides an interface for creating objects in a superclass, but allows subclasses to alter the type of objects that will be created.
+
+- **Singleton** – having only 1 instance of an object. – it’s OK if it’s not shared it’s perfect to get access from allover the place to this entity. A Singleton encapsulates a unique resource and makes it readily available throughout the application.	
+- **Singleton** – shared resource [stored data] multiple objects must have access to that data, here we start to have race conditions (here we can use mutexes, cond-vars, double check pattern approach)	
+- **Singleton** – extra problem – it can become a SUPERCLASS, that knows everything about everyone and every software part and software layer can have access to any variable or object that’s inside the Singleton (Laser-class).
+
+- **Singleton** –  We can have any type of problems – starting from INCONSISTANCY OF VARIABLE STATES we read a buffered value, that has already changed it’s state on the device, finishing with – if it’s an shared resource and accessed from MULTIPLE THREADS at the same time, and it has a synchronization object we can get a deadlock
+- **Facade** - Provides a simplified interface to a library, a framework, or any other complex set of classes.
+
+Cons: Façade is usefull, when that simplified interface at the end really simplifies your life. We had a teammate who created 100 façade classes, each of them had a derived class, and our college sad when you will need the functionality of each of them, think in advance – Because 1) if you will be able to use my interface and subclass from it, then do it in the first place. 2) if you extremely need to subclass from the original class and you do not want to touch int interface, it’s up to you, but in this case think, maybe you are doing something wrong…
+Strong CONNECTEDNESS, 
+
+- **Template Method** - Defines the skeleton of an algorithm in the superclass but lets subclasses override specific steps of the algorithm without changing its structure.
+
+- **State** - Lets an object alter its behavior when its internal state changes. It appears as if the object changed its class.,
+- **Visitor** - Lets you separate algorithms from the objects on which they operate.
+- **Strategy** - Lets you define a family of algorithms, put each of them into a separate class, and make their objects interchangeable.
+
+- **Oberver or Listener** bei Client Server Applicationen
+The Observer looks for sertain amount of Actions and has appropriate ActionHandlers classes, that are called when the action accures. 
+_______________________->update() ------------------------------------ ObservA()
+[Subject->Subjects changes]->update()] ObserverBase with notify() -> ObservB()
+_______________________->update() --------------------------------------> ObservC()
+
+- **Command** - Turns a request into a stand-alone object that contains all information about the request. This transformation lets you pass requests as a method arguments, delay or queue a request's execution, and support undoable operations.
+- **Iterator** - Lets you traverse elements of a collection without exposing its underlying representation (list, stack, tree, etc.).
+- **Proxy** - Lets you provide a substitute or placeholder for another object. A proxy contr- ols access to the original object, allowing you to perform something either before or after the request gets through to the original object.- **
+
+- **Adapter** - Allows objects with incompatible interfaces to collaborate.
+- **Composite** - Lets you compose objects into tree structures and then work with these structures as if they were individual objects.
+- **Prototype** - Lets you copy existing objects without making your code dependent on their classes.
+- **Decorator** - Lets you attach new behaviors to objects by placing these objects inside special wrapper objects that contain the behaviors.
+
