@@ -985,10 +985,11 @@ Strong CONNECTEDNESS,
 
 - **Oberver or Listener** bei Client Server Applicationen
 The Observer looks for sertain amount of Actions and has appropriate ActionHandlers classes, that are called when the action accures. 
+```	
 _______________________->update() ------------------------------------ ObservA()
 [Subject->Subjects changes]->update()] ObserverBase with notify() -> ObservB()
 _______________________->update() --------------------------------------> ObservC()
-
+```
 - **Command** - Turns a request into a stand-alone object that contains all information about the request. This transformation lets you pass requests as a method arguments, delay or queue a request's execution, and support undoable operations.
 - **Iterator** - Lets you traverse elements of a collection without exposing its underlying representation (list, stack, tree, etc.).
 - **Proxy** - Lets you provide a substitute or placeholder for another object. A proxy contr- ols access to the original object, allowing you to perform something either before or after the request gets through to the original object.- **
