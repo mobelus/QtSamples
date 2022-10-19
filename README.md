@@ -1127,15 +1127,26 @@ int my_fact(int b)
   { c = c * i; }
   return c;
 }
+// tComplx: O(b) | Space O(1)
+// (-) works slower then the recursive solution
+// (+-) 2 edges of a stick: + more code easier to debug, - more code then in a recursion and requires extra container and or space
+// (+) no stackoverflow problem, and Space complexity is O(1)
 ```
 ### 4.2 Факториал (Рекурсивный) A: IN 5 OUT 125 (1x2x3x4x5)
 ```
 int my_fact(int num)  // вычисление факториала числа num
 {
-  if (num <= 1) return 1;  // если число не больше 1, возвращаем 1
-  else          return (num * fact(num - 1));  // рекурсивный вызов для числа на 1 меньше
+  if (num <= 1)
+	return 1;  // если число не больше 1, возвращаем 1
+	
+  return (num * fact(num - 1));  // рекурсивный вызов для числа на 1 меньше
 }
+// tComplx: O(b) | Space O(b)
+// (+) works faster, since we work with the stack memory
+// (+-) 2 edges of a stick: + less code / compact solution, - too compact, not perfect for debugging
+// (-) stackoverflow problem - since recurs leaves on a stack a return addres (to do the return call) to a function, on each step of the recursion level
 ```
+	
 ### 4.3 Фактореал - Факториал на Шаблонах
 ```
 template<unsigned N> struct factorial {
