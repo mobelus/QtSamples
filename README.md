@@ -958,8 +958,415 @@ v1.erase(v1.begin() + 7, v1.end());
 Далее UB (undefined behavior) Вероятнее всего вызовется метод самого базового класса, если тот определён, иначе ... вопрос.
 
 ===================================================================
+
+# TASKS / ЗАДАЧКИ
+
+1. Развернуть число
+2. Развернуть строку
+3. Возведение в степень
+4. Фактореал
+5. перевод строки в число = atio "своими руками"
+6. перевод числа в строку
+7. Из строки с пробелами удалить все пробелы в строке
+8. Найти подстроку в строке
+9. Алгоритм Бинарного поиска / Бинарный/Двоичный поиск С++
+10. Поиск пузырьком
+
+
+### 1. Развернуть число
+```
+int reverseStr(int& n) //tCmplx: O(N) //Space: O(1)
+{
+  int rev = 0, remainder = 0;
+  while(n != 0) {
+    remainder = n % 10;
+    rev = rev * 10 + remainder;
+    n /= 10;
+  }
+  return rev;
+}
+```
+
+### 2. Развернуть строку
+void reverseStr(string& str) //tCmplx: O(N) //Space: O(1)
+{
+    int n = str.length(); // Swap character starting from two corners
+    for (int i = 0; i < n / 2; i++) {
+        std::swap(str[i], str[(n - 1) - i]);
+		//or
+		//char temp = str[i];
+		//str[i] = str[ (len-1) - i];
+		//str[(len-1) - i] = temp;
+	}
+}
+//#include <bits/stdc++.h> and std::reverse(str.begin(), str.end()); // Reverse str[begin..end]
+// OR  Use of reverse iterators => string rev = string(str.Rbegin(), str.Rend());
+
+### 3.1 Возведение в степень - Возведение в степень (Итеративно) (Доп.)
+A: IN 2^4 OUT 16 (2x2x2x2)
+```
+int my_pow(int x, unsigned int power) // num^pow
+{
+  if (power == 0) return 1;
+  if (power == 1) return x;
+  int n = 15;
+  while ((power <<= 1) >= 0) n--;
+  long tmp = x;
+  while (--n > 0)
+    tmp = tmp * tmp * (((power <<= 1) < 0) ? x : 1);
+  return tmp;
+}
+```
+
+### 3.2 Возведение в степень - Возведение в степень (Итеративно) (без учёта отрицательных тепеней)
+A: IN 2^4 OUT 16 (2x2x2x2)
+```
+int my_pow(int n, unsigned int p) // num^pow
+{
+  int c = 1;
+  for(int i=0; i<p; i++)
+    c = n * c;
 	
-## PATTERN PATTERNS ШАБЛОНЫ ПРОЕКТИРОВАНИЯ СИСТЕМНЫЙ ДИЗАЙН ПАТТЕРНЫ
+  return c;
+}
+```
+
+### 3.3 Возведение в степень - Возведение в степень (Итеративно) (с учётом отрицательных степеней)
+A: IN 2^4 OUT 16 (2x2x2x2)
+
+A: IN 2^-2 OUT 0 (1/4 = 1/(2x2))
+```
+int my_pow(int n, int p) // num^pow
+{
+  if(p<0) // 2^(-2) = 1/(2^2)
+    p=(-1)*p;
+   
+  int c = 1;
+  for(int i=0; i<p; i++)
+  {
+    c = n * c;
+  }
+
+  if(p<0) // 2^(-2) = 1/(2^2)
+     c = 1 / c;
+
+  return c;
+}
+```
+
+### 3.4 Возведение в степень - Возведение в степень (Улучшенный по скорости)
+A: IN 2^6 OUT 64 (2x2x2x2x2x2)
+
+A: IN 2^5 OUT 32 (2x2x2x2x2)
+```
+int my_pow(int n, int p) // num^pow
+{
+  if(p<0) // 2^(-2) = 1/(2^2)
+    p=(-1)*p;
+
+  int c = 1;
+  if(p % 2 == 0) // степень чётная => возводим до половины и полвинное умножаем на само себя
+  {
+    for(int i=0; i<p/2; i++)
+    {
+      c = n * c;
+    }
+    c = c * c;
+  }
+  else // степень не чётная
+  {
+    for(int i=0; i<p; i++)
+    {
+      c = n * c;
+    }
+  }
+
+  if(p<0) // 2^(-2) = 1/(2^2)
+     c = 1 / c;
+
+  return c;
+}
+```
+
+### 4.1 Факториал (Итеративный) A: IN 5 OUT 125 (1x2x3x4x5)
+```
+int my_fact(int b)
+{
+  if(b<0) return 0; // или ОШИБКА !
+  
+  int c = 1;
+  for(int i=1; i<b+1; i++)
+  { c = c * i; }
+  return c;
+}
+```
+### 4.2 Факториал (Рекурсивный) A: IN 5 OUT 125 (1x2x3x4x5)
+```
+int my_fact(int num)  // вычисление факториала числа num
+{
+  if (num <= 1) return 1;  // если число не больше 1, возвращаем 1
+  else          return (num * fact(num - 1));  // рекурсивный вызов для числа на 1 меньше
+}
+```
+### 4.3 Фактореал - Факториал на Шаблонах
+```
+template<unsigned N> struct factorial {
+ static const unsigned value = N * factorial<N - 1>::value;
+};
+template<> struct factorial<0> {
+ static const unsigned value = 1;
+};
+
+// Пример обращения:
+const unsigned f5 = factorial<5>::value; // 120
+```
+
+### 5.1 перевод строки в число =  (1) atio "своими руками"
+A: IN строка str="345" OUT в число типа int n=435
+
+int myAtio(std::string a = "456")
+{
+  int c = 0;
+  int len = a.size();
+  
+  for(int i=0; i < len; i++)
+  {
+    c = c*10;
+	switch(a[i])
+	{
+	  case '0': c=c+0; break;
+	  case '1': c=c+1; break;
+	  case '2': c=c+2; break;
+	  case '3': c=c+3; break;
+	  case '4': c=c+4; break;
+	  case '5': c=c+5; break;
+	  case '6': c=c+6; break;
+	  case '7': c=c+7; break;
+	  case '8': c=c+8; break;
+	  case '9': c=c+9; break;
+	}
+  }
+  return c;
+}
+
+### 5.2 перевод строки в число = atio "своими руками"
+A: IN строка str="345" OUT в число типа int n=435
+
+int myAtio(std::string a = "456")
+{
+  int c = 0;
+  int len = a.size();
+  for(int i=0; i < len; i++)
+  {
+    c = c * 10;
+	c = (a[i] - '0') + c;
+  }
+  return c;
+}
+
+### 6. перевод числа в строку
+```
+1. Time Complexity: O(n) Auxiliary Space: O(n)
+ int num = 2016;
+ ostringstream str1;
+ str1 << num;
+ string geek = str1.str();
+
+2. Time Complexity: O(n) Auxiliary Space: O(n)
+ int i_val = 20;
+ string stri = to_string(i_val);
+  
+3.
+ string strf = boost::lexical_cast<string>(f_val);
+```
+
+### 7. Из строки с пробелами удалить все пробелы в строке
+```
+TO DO
+```
+
+### 8. Найти подстроку в строке
+```
+TO DO
+```
+
+### ПРОВЕРИТЬ
+```
+int binary_find(int n, int *x, long A)
+{
+ int m, left, right;
+ left = 0; right = n-1;
+ while (true)
+ {
+    if (left > right) return (-1); // значение не найдено
+    m = left + (right - left) / 2;
+    if (x[m] < A) left = m + 1;
+    if (x[m] > A) right = m - 1;
+    if (x[m] == A) return m;
+ }
+}
+```
+
+### 9. Алгоритм Бинарного поиска / Бинарный/Двоичный поиск С++
+### 9. Recursive implementation of Binary Search tCmplx: O(log n) ; Space: O(1)
+```
+int binarySearch(int arr[], int l, int r, int x)
+{
+  if (r >= l) {
+      int mid = l + (r - l) / 2;
+      // If the element is present at the middle itself
+      if (arr[mid] == x)
+          return mid;
+      // If element is smaller than mid, then
+      // it can only be present in left subarray
+      if (arr[mid] > x)
+          return binarySearch(arr, l, mid - 1, x);
+      // Else the element can only be present
+      // in right subarray
+      return binarySearch(arr, mid + 1, r, x);
+  }
+  // We reach here when element is not present in array
+  return -1;
+}
+ 
+int main(void)
+{
+    int arr[] = { 2, 3, 4, 10, 40 };
+    int x = 10;
+    int n = sizeof(arr) / sizeof(arr[0]);
+    int result = binarySearch(arr, 0, n - 1, x);
+}
+```
+
+### 9. Алгоритм Бинарного поиска / Бинарный/Двоичный поиск С++
+### 9. Iterative implementation to Binary Search tCmplx: O(log n) ; Space: O(1)
+```
+int binarySearch(vector<int> v, int To_Find)
+{
+  int lo = 0, hi = v.size() - 1;
+  int mid;
+  // This below check covers all cases , so need to check
+  // for mid=lo-(hi-lo)/2
+  
+  while (hi - lo > 1) { // while(lo<=hi)
+      int mid = (hi + lo) / 2;
+  	
+      if (v[mid] < To_Find) {
+          lo = mid + 1;
+      }
+      else {
+          hi = mid;
+      }
+  }
+  
+  if (v[lo] == To_Find) { cout << "Found" << " At Index " << lo << endl; }
+  else if (v[hi] == To_Find) { cout << "Found" << " At Index " << hi << endl; }
+  else { cout << "Not Found" << endl; }
+}
+ 
+int main()
+{
+  vector<int> v = { 1, 3, 4, 5, 6 };
+  int To_Find = 1;
+  binarySearch(v, To_Find);
+}
+```
+	
+### 10.1 Сортировка  пузырьком
+```
+template<typename T>
+void bubble_sort(T array[], std::size_t size)
+{
+  for (std::size_t idx_i = 0; idx_i < size - 1; idx_i++)
+  {
+    for (std::size_t idx_j = 0; idx_j < size - idx_i - 1; idx_j++)
+    {
+      if (array[idx_j + 1] < array[idx_j])
+      {
+        std::swap(array[idx_j], array[idx_j + 1]);
+      }
+    }
+  }
+}
+```
+### 10.2 Сортировка  пузырьком улучшенный
+```
+void bubbleSort(int* arrayPtr, int arrLen) // сортировка пузырьком
+{
+ int temp = 0; // временная переменная для хранения элемента массива
+ bool exit = false; // булевая переменная для выхода из цикла, если массив отсортирован
+ 
+ while (!exit) // пока массив не отсортирован
+ {
+  exit = true;
+  for (int i = 0; i < (arrLen - 1); i++) // внутренний цикл
+    //сортировка пузырьком по возрастанию - знак >
+    //сортировка пузырьком по убыванию - знак <
+    if (arrayPtr[i] > arrayPtr[i + 1]) // сравниваем два соседних элемента
+    {
+     // выполняем перестановку элементов массива
+     temp = arrayPtr[i];
+     arrayPtr[i] = arrayPtr[i + 1];
+     arrayPtr[i + 1] = temp;
+     exit = false; // на очередной итерации была произведена перестановка элементов
+    }
+ }
+}
+```
+
+### 11. Развернуть linked_list
+``` 
+// Link list node
+struct Node {
+    int data;
+    struct Node* next;
+    Node(int data)
+    {
+        this->data = data;
+        next = NULL;
+    }
+};
+ 
+struct LinkedList {
+    Node* head;
+    LinkedList() { head = NULL; } 
+	
+    // Function to reverse the linked list
+    void reverse()
+    {
+        // Initialize current, previous and next pointers
+        Node* current = head;
+        Node *prev = NULL, *next = NULL;
+        while (current != NULL) {
+            next = current->next; // Store next
+            current->next = prev; // Reverse current node's pointer
+            prev = current; // Move pointers one position ahead.
+            current = next;
+        }
+        head = prev;
+    }
+ 
+    void push(int data)
+    {
+        Node* temp = new Node(data);
+        temp->next = head;
+        head = temp;
+    }
+};
+ 
+/* Driver code*/
+int main()
+{
+    /* Start with the empty list */
+    LinkedList ll;
+    ll.push(20);
+}
+```
+
+===================================================================
+	
+	
+# PATTERN PATTERNS ШАБЛОНЫ ПРОЕКТИРОВАНИЯ СИСТЕМНЫЙ ДИЗАЙН ПАТТЕРНЫ
 	
 **CONS in general: OVERENGENEERING**
 
@@ -998,4 +1405,52 @@ _______________________->update() --------------------------------------> Observ
 - **Composite** - Lets you compose objects into tree structures and then work with these structures as if they were individual objects.
 - **Prototype** - Lets you copy existing objects without making your code dependent on their classes.
 - **Decorator** - Lets you attach new behaviors to objects by placing these objects inside special wrapper objects that contain the behaviors.
+	
+	
+	
+	
+Was das fachliche anbetrifft.
+In der IT brounche habe ich als Windows SystemAdministartor zu arbeiten. Meine Arbeit bestand darin dass ich Oper.Systeme auf die PCs installiert habe, Drucker und andere Geräte angegschlossen, Einrichtung lokaler Netze, etwas ingenior Arbeit. Ich habe mich hier mit BorlandC++ Builder begegnet. War kein richtiges programieren, aber die erste Begegnung mit c++ Sprache und mit IDE.
+Dann im Dritten StudienJahr hatten wir ein Betriebspraktikum bei Kaspersky. Dort leitete man uns in das Project ein, man hat unz gezeigt wie VierenAnalytiker arbeiten, wie Sie die meiste Zeit das untershiedlichste code sehen, VisualBasic code, C++, JavaScript und andere, wie man den Reverce Enegeniering des Codes macht. Ich habe rheines C code für einige Teile des Analyseszstems geschrieben, Suchalgorythmen analisiert und sehr viel debugging von code gemacht um Patterns zu entdecken. Ich konnte nich angestellt werden, da sie nur nach Seniour SWE suchten, nur Seniour Positionen waren in der Firma offen, und ich hatte noch nicht genug ERFAHRUNG.
+SW Enwicklung hat mir noch ab der Uni gefallen. Dort war beides interssant – sowohl das obeflachlicke auf der Client seite alsauch die backend seite der programmierung. Der fakt das man mit code etwas erschaffen kann und das es funkzioniert und alles was man dafür braucht ist – nur code zu schreiben. Obwohl wir in dem 1-sten StudienJar nur rheines C, Pascal und Visual Basic hatten, trotzdem, als man mir gezeigt hat wie man diese Basis Kentnisse in der Realität nutzt und das man damit große software produkte ertellen kann, ich wollte nur mehr und tiefer mich damit beschäftigen und weiter als SWE zu arbeiten.
+Als SW Enwitckler habe in der Firma Symbol Designe (Task in Task out, Kanban)
+Windows Client Server Application – Es waren mehrere SCADA-Systeme für Fixierung von Erdölleck auf der Erdölleitung.  Die mit C++ entwickelt worden waren. Wieso – weil man jeden Protokol unterschtützen konnte, und Maximale flexibilität.  Viel GUI-Programmierung (MFC classen, BCGP bibl) und etwas Multi-Threading mit standarten STL-Funktionalität und deren Objekte std::condition_variable, std::thread, deque, algorithm Transport der Daten zwischen dem Server und den Geräten (Cleine SCADA Densitometer, Controller, Druckmäsgeraten) war OPC und COM/DCOM um mit C# server von ein par Firmen extra zu kommunizieren.  Die Firma war zu klein, nach drei Jahren habe ich gespürt, dass ich nicht wachse, und ich wollte mich weiter entwickeln und mehr Verdienen
+C++ Softwareentwickler Encore GmbH, Moskau. (Kleines Team aus 2 Entwickler erste begegnung mit Scrum)
+- Ich habe mich der Entwicklung eines Benutzer Authentifizierungssystem für Windows und Astralinux (Credential Provider, dadurch erlaubt Windows den Winlogon zu customisieren) angeschlossen. Ich habe extra den Teil für das einloggen mit CryptoToken geschrieben. Viel WINAPI + CryptoAPI + Nur BackendSeite. Dazu noch extra Entwicklung von Bibliotheken und Windows-Services die private Benutzer-Informationen spechern und bearbeiten. (Token Zugriff und etc.)
+- Entwicklung von Integritätskontrollsystem von Dateien (Ordnern) und Windows-Registrierungsdatenbank. In diesem Projekt habe ich persönlich - GUI auf QT entwickelt und den Teil für Integritätskontrolle von Registrierungsdatenbank auf mich genommen
+Ich habe kurz auf dieser Stelle gerabeitet, weil die Firma sich geschlossen hat. Es hatte mehr mit der Arbeit der Manager und einer nicht richtigen Posizionierung der Firma auf dem Markt, und die Firma ist Pleite gegangen. Und ich musste meine Arbeit wechseln.
+C++ Leading Developer RGS GROUP OAG, Moskau – zu einfache Arbeit, zu alte Technologien, und kein Wachstum als Spezialist ... CRM - customer relationship management -   
+Nicht das ich von jeder Arbeit weggeehe wo es mir zu einfach alles scheint. Ich habe 2 bis 3 Wochen nicht gearbeitet und keine Aufgaben gebat. Der Grund dafür war der Waterfall-Prinziep. Es was ein altes Produrk, einige APIS waren noch in 1995 geschrieben. Es war eiene Große Firma, und sie stellte BtoB produkte, also Ihre Kunden waren kleinere Versicherungs-Firmen. Meistens machte der Kunde einfach 3 – 10 screenshots von unterschiedlichster Software, hat die Technische Aufgabe beschrieben und, danach haben die Analytiker von dem Kunden extra Information über das Produkt gesammelt. Am nächsten Schritt machten vor ein Entwurf der DatenBank (zusammen mit den DatenBank Spetialisten), oder wir habe besprochen wie wir das in das schon existierte szstem integrieren konnten. SoftwareDesign - GUI-Makett wurde entworfen und die Business logig beschrieben. Ich bekam (WATERFALL tief durchVerabeitete TA) eine 200 seitige Technische Aufgabe, und man musste es innerhalb von 1 oder 2 Monate alles fertig stellen.
+ERP/CRM/CAD/CAM-System vorbestimmt für Berechnungen von Versicherungslebensmitteln. Entwicklung von Backend in C++ und GUI mit MFC-Framework in MS Visual Studio 2013 (neue Apps mit Qt (QML) in QtCreator)
+Ein bischen habe ich dort auch mit Neuronetzen gearbeitet, aber diese Abteilung der Firma hat sich zu spät organisiert und ich hatte zu diesem Zeitpunkt schon einen JobOffer von der TochterFirma der Russischen Bahn auf der Hand
+
+Es waren etwas zu kurze Stationen,  der Grund dafür lag daran das hie
+01/2018 – bis heute C++/Qt Leading Software Engineer Locotech-Signal Moskau	TochtorFirma der Russischen Bahn
+Client- und Serverseiten von SCADA für Eisenbahnverkehrsysteme.
+1 Jahr habe ich als normaler SoftwareEngenier gearbeitet und dann Habe ich ein TeamLead 4 Entwicklern geleitet. Ich war ScrumMaster, habe scrum Meetings geführt. Das übliche halt, Iteration gestartet, Große Aufgabe besprochen, sie in kleinere Aufgaben aufgeteilt - Dekomposition gemacht, nachdem ware Aufgaben auch dem Scrum-Board, Arbeits-zeiten für jede aufgabe geplant und fixiert and Iteration startete. Hier arbeiteten wir nach einem normalen Scrum, mit allen Teilnehmer des Entwicklungsprozess: Analytiker, UI/UI-Designer, SoftwareEntwickler, Tester
+
+1. ClientServerApp 2. StationDesigner – CAD-System 3. Logs Player 
+
+Eisenbahnverkehrsysteme. GUI Implementierung mit Qt Widgets, tiefe benutzerdefinierte Implementierung. Entwicklung von Visualisation des Eisenbahnverkehrs, als ein QtQuickView-Komponent mit standarten und selbst entwickelten benutzerdefinierten QtQuick-Controls (viel QML). 80% von allen Projekten der Firma sind mit Qt-Framework geschrieben (nicht nur Qt GUI-Classen sondern auch Qt-Container / Threading Classen / QSqlDatabase / QModbus und andere.
+Client - QMLScene in der Mitte mit Widgets umgeben - Treeviews mit statinen links, Alarame Warnungen Informations Messeges unten in ter TabellenViw, Rects die wichtingsten Knöpfe,
+
+++ Senior Software Engineer at "IPG Photonics",
+
+Reimplemented old Singleton-based application solution by adding more suitable application and communication layers. 
+Singleton – extra problem – it can become a SUPERCLASS, that knows everything about everyone and every software part and software layer can have access to any variable or object that’s inside the Singleton (Laser-class).
+Singleton –  We can have any type of problems – starting from INCONSISTANCY OF VARIABLE STATES we read a buffered value, that has already changed it’s state on the device, finishing with – if it’s an shared resource and accessed from MULTIPLE THREADS at the same time, and it has a synchronization object we can get a deadlock
+Singleton – having only 1 instance of an object. – it’s OK if it’s not shared it’s perfect to get access from allover the place to this entity. A Singleton encapsulates a unique resource and makes it readily available throughout the application.
+Singleton – shared resource [stored data] multiple objects must have access to that data, here we start to have race conditions (here we can use mutexes, cond-vars, double check pattern approach)
+SOLUTION WAS – we just have sent the commands not in Asyncronious manner but in Syncronious manner. There for we could right away have time to wait for the answer, if we did not got it => means the device, board, firmware, or something else was broken either way and we had to shut down the system. The syncronious manar also gave us the possibility easy to send multiple commands always in a correct and for sure known order. And we have sent the commands not from the Superclass that contained each and every state, but we just called it inside of thar particular place, where these commands were really needed. If we had to know anything else abot multiple systemparts or their states, we always could pass a pointer of that instance, we could collect multiple pointers in a deccisionManagerClass,  use a proxy class ETZETERA it was up to the situation
+
+Developed a line following algorithm for a laser knife which uses CAN Bus to communicate with camera and the laser.
+The ALGO had 3 steps:
+1) First there was a laser pointer, and it pointed out the way of the laser knife. We pressed the button and the system SAVED the “way” for the knife. Then we have chosen Frequency, Power and Pulse Energy for the laser, and how deep should the knife go in. 
+2) Then The one thread got the information about the knife positions and compared it to the positions of the way, that the knife should go, following the vector that was calculated as the nearest waypoint between 2 points
+WE had only a CONDITION_VARIABLE to notify both threads that something went wrong.
+3) The laser pointer in the other thread was watching for the organ, and was watching if there will be any unexpected movement during the procedure.
+4) These 2 threads did not have any shared objects or shared memory, so there was not that much of concurrency stuff to be handled.
+
+CONS in general: OVERENGENEERING
+
 
