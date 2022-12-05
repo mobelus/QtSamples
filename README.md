@@ -1154,6 +1154,7 @@ int my_fact(int num)  // вычисление факториала числа nu
 ```
 	
 ### 4.3 Фактореал - Факториал на Шаблонах
+
 ```
 template<unsigned N> struct factorial {
  static const unsigned value = N * factorial<N - 1>::value;
@@ -1169,6 +1170,7 @@ const unsigned f5 = factorial<5>::value; // 120
 ### 5.1 перевод строки в число =  (1) atio "своими руками"
 A: IN строка str="345" OUT в число типа int n=435
 
+```
 int myAtio(std::string a = "456")
 {
   int c = 0;
@@ -1193,10 +1195,12 @@ int myAtio(std::string a = "456")
   }
   return c;
 }
-
+```
+		       
 ### 5.2 перевод строки в число = atio "своими руками"
 A: IN строка str="345" OUT в число типа int n=435
 
+```
 int myAtio(std::string a = "456")
 {
   int c = 0;
@@ -1208,6 +1212,7 @@ int myAtio(std::string a = "456")
   }
   return c;
 }
+```
 
 ### 6. перевод числа в строку
 ```
@@ -1227,12 +1232,77 @@ int myAtio(std::string a = "456")
 
 ### 7. Из строки с пробелами удалить все пробелы в строке
 ```
-TO DO
+class DeleteAllSpacesFromString
+{
+public:
+    DeleteAllSpacesFromString();
+    ~DeleteAllSpacesFromString();
+    
+    /// Решение с выделением доп памяти
+    std::string deleteAllSpacesFromString(const std::string& s)
+    {
+        std::string res;
+        for (auto symbol: s) {
+            if(symbol != ' ') {
+                res.push_back(symbol);
+            }
+        }
+        return res;
+    }
+
+    /// Решение БЕЗ выделения доп памяти
+    void deleteAllSpacesFromStringExtra(std::string& s)
+    {
+        for (int i = 0; i< s.size(); ++i) {
+            if (s[i] == ' ') {
+                for (int j = i + 1; j < s.size(); ++j) {
+                    if (s[j] != ' ') {
+                        s[i] = s[j];
+                        s[j] = ' ';
+                    }
+                }
+            }
+        }
+    }
+
+};
+	
 ```
 
 ### 8. Найти подстроку в строке
+
 ```
-TO DO
+#include <string>
+#include <iostream>
+
+using namespace std;
+
+template<typename T>
+void removeSubstrs
+(
+  basic_string<T>& str,
+  const basic_string<T>& psub
+)
+{
+  basic_string<T>::size_type n = psub.length();
+
+  for( basic_string<T>::size_type i = str.find(psub);
+       i != basic_string<T>::npos;
+       i = str.find(psub)
+  )
+  {
+    str.erase(i, n);
+  }
+}
+
+int main()
+{
+   string s = "One fish, two fish, red fish, blue fish";
+   string p = "fish";
+   removeSubstrs(s, p);
+   cout << s << '\n';
+}
+	
 ```
 
 ### ПРОВЕРИТЬ
