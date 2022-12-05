@@ -1002,6 +1002,7 @@ v1.erase(v1.begin() + 7, v1.end());
 
 
 ### 1. Развернуть число
+
 ```
 int reverseStr(int& n) //tCmplx: O(N) //Space: O(1)
 {
@@ -1016,6 +1017,8 @@ int reverseStr(int& n) //tCmplx: O(N) //Space: O(1)
 ```
 
 ### 2. Развернуть строку
+
+```
 void reverseStr(string& str) //tCmplx: O(N) //Space: O(1)
 {
     int n = str.length(); // Swap character starting from two corners
@@ -1029,9 +1032,11 @@ void reverseStr(string& str) //tCmplx: O(N) //Space: O(1)
 }
 //#include <bits/stdc++.h> and std::reverse(str.begin(), str.end()); // Reverse str[begin..end]
 // OR  Use of reverse iterators => string rev = string(str.Rbegin(), str.Rend());
+```
 
 ### 3.1 Возведение в степень - Возведение в степень (Итеративно) (Доп.)
 A: IN 2^4 OUT 16 (2x2x2x2)
+
 ```
 int my_pow(int x, unsigned int power) // num^pow
 {
@@ -1048,6 +1053,7 @@ int my_pow(int x, unsigned int power) // num^pow
 
 ### 3.2 Возведение в степень - Возведение в степень (Итеративно) (без учёта отрицательных тепеней)
 A: IN 2^4 OUT 16 (2x2x2x2)
+
 ```
 int my_pow(int n, unsigned int p) // num^pow
 {
