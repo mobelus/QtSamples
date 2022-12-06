@@ -2091,7 +2091,87 @@ int main()
 	
 	
 # PATTERN PATTERNS ШАБЛОНЫ ПРОЕКТИРОВАНИЯ СИСТЕМНЫЙ ДИЗАЙН ПАТТЕРНЫ
+
+https://en.wikipedia.org/wiki/Double-checked_locking
+
+С С++11 проблемы больше для поддержки потоков ничего и не надо. Но до полной его поддержки всеми компиляторами надо ещё дожить.
+```	
+Singleton& GetInstance() {
+  static Singleton s;
+  return s;
+}
+```
 	
+### Q: Синглтон Класс (небезопасный в многопоточном окружении до С++11)
+```
+// Singleton.h
+class Singleton
+{
+  private:
+    static Singleton * p_instance;
+    // Конструкторы и оператор присваивания недоступны клиентам
+    Singleton() { }
+    Singleton( const Singleton& );  
+    Singleton& operator=( Singleton& );
+  public:
+    static Singleton * getInstance() {
+        if(!p_instance)           
+            p_instance = new Singleton();
+        return p_instance;
+    }
+};
+```
+
+### Q: Синглтон Мейерса / Майерса (небезопасный в многопоточном окружении  до С++11) КОД 
+```
+// Singleton.h
+class Singleton
+{
+private: 
+    Singleton() {}
+    Singleton( const Singleton&);  
+    Singleton& operator=( Singleton& );
+public:
+    static Singleton& getInstance() {
+        static Singleton  instance;
+        return instance;
+    }    
+}; 
+```	
+
+### Q: Синглтон Дейкстры (использующий метода "Double-Checked Locking" для threadsafity) 
+Ранее проблему решали с использованием метода "Double-Checked Locking" / "Double-Checked Locking Pattern" / Блокировка с двойной проверкой, хоть он и был более затратен.
+По причине возникновения такого решения, синглтон с использованием "Double-Checked Locking" назвали Синглтон Дейкстры.	
+
+```
+#include <atomic>
+#include <mutex>
+
+class Singleton {
+ public:
+  static Singleton* GetInstance() 
+  {
+    Singleton* p = s_instance.load(std::memory_order_acquire);
+    if (p == nullptr) { // 1st check
+      std::lock_guard<std::mutex> lock(s_mutex);
+      p = s_instance.load(std::memory_order_relaxed);
+      if (p == nullptr) { // 2nd (double) check
+        p = new Singleton();
+        s_instance.store(p, std::memory_order_release);
+      }
+    }
+    return p;
+  }	
+
+ private:
+  Singleton() = default;
+
+  static std::atomic<Singleton*> s_instance;
+  static std::mutex s_mutex;
+};
+
+```	
+
 **CONS in general: OVERENGENEERING**
 
 - **Abstract Factory** - Lets you produce families of related objects without specifying their concrete classes.
