@@ -995,6 +995,80 @@ public:
 };
 ```
 
+### Хотим сложную структуру сделать ключём map/set или unordnered_map/set
+		    
+- Для MAP/SET
+
+https://dawnarc.com/2019/09/c-how-to-use-a-struct-as-key-in-a-std-map/
+		    
+Переопределение operator < / operator< / operator меньше (и operator==)
+```
+// Works // Old but Gold
+bool compareFunc(const Param& lhs, const Param& rhs)
+{
+  bool res = false;
+  if (lhs.param_1 < rhs.param_1)
+  { res = true; }
+  else if(lhs.param_1 == rhs.param_1)
+  {
+    if (lhs.param_2 < rhs.param_2 )
+    { res = true; }
+    else if(lhs.param_2 == rhs.param_2)
+    {  ...
+      {
+        res = lhs.param_N < rhs.param_N;
+      }
+    }
+  }
+  return res;
+}
+```
+- Для unordnered_MAP/SET
+	
+https://stackoverflow.com/questions/17016175/c-unordered-map-using-a-custom-class-type-as-the-key
+	
+1) В структуре/классе ключа - Переопределить operator== / operator == / operator сравнения - сравнения ключей должно учитывать, что могут быть хеш-коллизии
+2) Дописать функцию хэширования (написать класс с переопределённым operator()(const Key& k), который принимает const Key& вызисляет сам хэш из данных Key-структуры и передать написанную нами функцию хеширования 3-тьим параметром в контейнер unordnered_MAP/SET (std::unordered_map<Key,std::string,KeyHasher>)
+```
+#include <iostream>
+#include <unordered_map>
+	
+struct Key
+{
+  std::string first;
+  std::string second;
+  int         third;
+
+  bool operator==(const Key &other) const
+  { return (first == other.first
+            && second == other.second
+            && third == other.third);
+  }
+};
+
+struct KeyHasher
+{
+  std::size_t operator()(const Key& k) const
+  {
+    using std::size_t;
+    using std::hash;
+    using std::string;
+
+    return ((hash<string>()(k.first)
+             ^ (hash<string>()(k.second) << 1)) >> 1)
+             ^ (hash<int>()(k.third) << 1);
+  }
+};
+
+int main()
+{
+std::unordered_map<Key,std::string,KeyHasher> m6 = {
+    { {"John", "Doe", 12}, "example"},
+    { {"Mary", "Sue", 21}, "another"}
+  };
+}
+```
+	
 ===================================================================
 
 ### Виртуальные методы из Конструкторов или Деструкторов
