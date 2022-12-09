@@ -683,6 +683,38 @@ struct C : ABase, BBase
 - конструктор вызовется у полей b - он раньше объявлен, a - он позже;
 - сначала деструкторы Сам класс, далее сначала поле a, потом поле b и только потом родительсвие опять же в обратном порядке ~BBase ~ABase
 
+### Виртуальное наследование - зачем нужно:
+- Решает проблему ромбовидного наследования
+```
+class A { int x; };
+class B: public A {};
+class C: public A {};
+class D: public B, public C {};  
+D d;
+d.x; // проблема, из "x" брать из B или из C
+     // в D будет 2 экземпляра "х" 1. B::x и 2. C::x
+```
+РЕШЕНИЕ 1 - Виртуальное наследование
+```
+class A { int x; };
+class B: virtual public A {};
+class C: virtual public A {};
+class D: public B, public C {};  
+D d;
+d.x; // проблемы НЕТ из "x" стало одно A::x
+```
+РЕШЕНИЕ 2 (Без виртуального наследования)
+- Решение проблемы ромбовидного наследования Двойное двоеточие - "оператор разрешения области видимости" 
+```
+class A { int x; };
+class B: public A {};
+class C: public A {};
+class D: public B, public C {};  
+D d;
+d.B::x;
+d.C::x;
+```
+	
 
 https://tproger.ru/articles/move-semantics-and-rvalue/
 
