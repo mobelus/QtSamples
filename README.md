@@ -982,7 +982,12 @@ T&& forward(T&& param)
 
 ### **Склейка ссылок**
 
-``` Если при разворачивании шалона, получается lval-ref на lval-ref => 1. T& & => T& 2. T& && => T& 3. T&& & => T& 4. T&& && => T&& ```
+- Если при разворачивании шалона, 
+получается lval-ref на lval-ref =>
+1. T& & => T& 
+2. T& && => T& 
+3. T&& & => T& 
+4. T&& && => T&& 
 
 ===================================================================
 ### Для чего нужен std::forward?
@@ -997,9 +1002,15 @@ T&& forward(T&& param)
 2. использование std:move можно найти в различных алгоритмах, где нужно менять элементы местами
 3. Быстрый Переброс данных из вектора в вектор
 ```
-v2.insert(v2.end(), std::make_move_iterator(v1.begin() + 7), 
-                    std::make_move_iterator(v1.end()));
-As others have pointed out, first vector v1 is now in indeterminate state, so use erase to clear the mess:
+v2.insert
+(
+  v2.end(),
+  std::make_move_iterator(v1.begin() + 7), 
+  std::make_move_iterator(v1.end())
+);
+As others have pointed out, first vector v1 
+is now in indeterminate state, 
+so use erase to clear the mess:
 v1.erase(v1.begin() + 7, v1.end());
 ```
 ===================================================================
@@ -1011,11 +1022,14 @@ v1.erase(v1.begin() + 7, v1.end());
 - В заключение хочется порекомендовать использовать универсальную инициализацию в любом новом коде на C++, а также явно объявлять конструкторы explicit всегда, кроме случаев, когда неявное преобразование семантически оправдано.
 ===================================================================
 ### placement new
-- Как можно создать объект класса по определённому адресу в памяти ? по конкретному адресу в памяти ?
+Как можно создать объект класса по определённому адресу в памяти ? по конкретному адресу в памяти ?
 - Использовать оператор placement new
 - Использовать MEMCPY ( Адрес_Куда, Адрес_Откуда, Размер_Скок_Скопировать ) 
+
 ``` memcpy( &dst[dstIdx], &src[srcIdx], numElementsToCopy * sizeof( Element ) ); ```
+
 ещё как-то побитово копировать
+
 ===================================================================
 ### mutable 
 - Для CONST-тантных методов, которые не могут изменять состояние экземпляра класса и которые и было введено ключевое слово mutable - ибо их он изменять может в отличие от всех сотальных.
@@ -1046,9 +1060,9 @@ i = 2; // ERROR;
 
 ```
 {
-  int        a   = 1;
-  int        b   = 2;
-  int        aa  = 11;
+  int a  = 1;
+  int b  = 2;
+  int aa = 11;
 
   // [CONST INT <=> INT CONST] POINTER
   const int *cip = &a;
@@ -1056,13 +1070,13 @@ i = 2; // ERROR;
   //*cip         = aa;  // compile ERROR // assignment of read-only location ‘cip’
   cip = &k;             // Ok
 
-  int        c   = 3;
-  int        cc  = 33;
+  int c  = 3;
+  int cc = 33;
   
   // [CONST INT <=> INT CONST] POINTER
   int *const ipc = &c;
-  *ipc           = cc;  // Ok
-  //ipc          = &cc; // compile ERROR // assignment of read-only variable ‘ipc’
+  *ipc  = cc;  // Ok
+  //ipc = &cc; // compile ERROR // assignment of read-only variable ‘ipc’
   
   // ALSO 1
   const char * const s = "data"; // работает
@@ -1202,18 +1216,18 @@ std::unordered_map<Key,std::string,KeyHasher> m6 = {
 (!) ПОДРОБНО:
 
 Итак, если вы написали
-class Empty {};
+class A {}; // Empty
 
 То, знайте, что на самом деле вы создали примерно вот такой класс:
-class Empty 
+class A 
 {
 public:
-  ~Empty();  // Деструктор
-  Empty();  // Конструктор без параметров
-  Empty(const Empty & that);  // Копирующий конструктор по умолчанию (тупо копирует все поля)
-  Empty& operator=(const Empty & that);  // Оператор присваивания
-  Empty(Empty&& that) {} // C++11 // Коснтруктор перемещения (Перемещающий конструктор) 
-  Empty& operator=(Empty&& that) {} // C++11 // Оператор перемещения (Перемещающий оператор присваивания)
+  ~A(); // Деструктор
+  A();  // Конструктор без параметров
+  A(const A & that);        // Копирующий конструктор по умолчанию (тупо копирует все поля)
+  A& operator=(const A & that); // Оператор присваивания
+  A(A&& that) {} // C++11   // Коснтруктор перемещения (Перемещающий конструктор) 
+  A& operator=(A&& that) {} // C++11 // Оператор перемещения (Перемещающий оператор присваивания)
 };
 
 //  помним так же про
