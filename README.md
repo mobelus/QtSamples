@@ -1,6 +1,8 @@
 # QtSamples
 Many small samples of qt projects
 
+TODO - https://www.youtube.com/watch?time_continue=347&v=iR8K6ya0ZaY&feature=emb_logo
+
 
 http://qt.shoutwiki.com/wiki/Closing_a_Qt_Quick_application_from_QML
 
@@ -1397,6 +1399,7 @@ http://www.cyberforum.ru/cpp-beginners/thread921902.html
 - семафоры как частный случай мьютекса
 
 - А так же для асинхронных уже не проблем а просто решений в 11 стандарте так же есть:
+- packaged_task()
 - future - future_error
 - promise - future_error
 - async
