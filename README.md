@@ -1417,6 +1417,554 @@ template<class T> struct Arr
 
 
 
+### Порядок создания и уничтожения объектов:
+
+```
+class A : public E, F, G
+{
+public:
+	A() : __b(1), __c(2), __d(3) { }
+	~A() { }
+
+	// Порядок создания и удаления
+	B __b; // 1() //3~()
+	D __d; // 2() //2~()
+	C __c; // 3() //1~()
+	int _a = 0;
+};
+
+то есть:
+ E()
+ F()
+ G()
+ 
+ B()
+ D()
+ C()
+ 
+ A()
+ 
+ ~A()
+ 
+~C()
+~D()
+~B()
+
+~G()
+~F()
+~E()
+
+```
+
+### Свой класс исключений
+
+```
+class BaseException { public:
+  BaseException() { printf("Base"); }
+  ~BaseException() { printf("~Base"); }
+};
+class DerivedException : public BaseException
+{ public:
+  DerivedException() { printf("Derived"); }
+  ~DerivedException() { printf("~Derived"); }
+};
+class SubException : public DerivedException
+{ public:
+  SubException() { printf("Sub"); }
+  ~SubException() { printf("~Sub"); }
+};
+
+// ERROR
+// ВСЕГДА ЛОВИТСЯ БУДЕТ catch (BaseException e)
+// не важно какое исключение бросится Base / Sub / Derived
+
+try { throw NumberException(x); }
+catch (BaseException e) { printf("catch for Base"); }
+catch (SubException sex) { printf("catch for SubException"); }
+catch (DerivedException dex) { printf("catch for DerivedException"); }
+```
+- Порядок catch() блоков для корректной работы исключений, имеющих какую-то иерархию, следующий:
+```
+try { throw NumberException(x); }
+catch (MOST_CHILD_EX last_child_ex) { ... }
+...
+catch (DERIVED_DERIVED_EX ddex) { ... }
+catch (DERIVED_EX dex) { ... }
+catch (BASE_EXCEPTION dex) { ... }
+```
+- последний под-класс должен стоять в самом ПЕРВОМ catch, а Базовый класс-первый-родитель должен стоять в ПОСЛЕДНЕМ catch, иначе ловиться исключения будут неверно.
+
+### Обработка двойного исключения
+
+```
+class ExitBoom
+{
+public:
+  ExitBoom() { printf("ExitBoom()"); }
+  ~ExitBoom() {
+    printf("~ExitBoom");
+    throw 2;
+  }
+};
+
+void main() {
+try  {
+  ExitBoom bomb;
+  throw 1;
+  
+  // throw 1; - бросает исключение, 
+  // Это вызывет выход за единицу трансляции 
+  // блока try{}, выходим за его фиг.скобки
+  // Это вызывает уничтожение всех локальных 
+  // объектов, в частности уничтоженеие объекта bomb
+  // вызывается его деструктор и бросается throw 2;
+  // 2 исключения в одном блоке try приведут к
+  // terminate -> и abort() has been called
+}
+catch (...) {
+  printf("catch");
+}
+}
+```
+- ЕСЛИ в Блоке try происходит более одного исключения, то это приводит к вызову terminate()
+
+
+### Исключение в Конктрукторе / Исключения в Конктрукторе / Исключения в Конктрукторах / Конструктор и исключение
+Вот что написано в стандарте С++ 2011 пункт 15.2.2
+
+An object of any storage duration whose initialization or destruction is terminated by an exception will have destructors executed for all of its fully constructed subobjects (excluding the variant members of a union-like class), that is, for subobjects for which the principal constructor (12.6.2) has completed execution and the destructor has not yet begun execution. Similarly, if the non-delegating constructor for an object has completed execution and a delegating constructor for that object exits with an exception, the object’s destructor will be invoked. If the object was allocated in a new-expression, the matching deallocation function (3.7.4.2, 5.3.4, 12.5), if any, is called to free the storage occupied by the object.
+
+- Итак: Бросаем исключение в конструкторе
+- Помним первое - В языке C++ объект считается созданным только в тот момент, когда его конструктор завершит выполнение без ошибок. Здесь этого не происходит, поэтому объект никогда не был создан, а, значит, и память под него "как бы" не выделялась.
+- Компилятор обязан корректно освободить память, в которой будет находится объект, в случае исключения в его конструкторе, при этом то вызываются деструкторы всех уже созданных объектов, в следующем порядке: 
+- Деструктор самого класса НЕ вызовется, 
+- НО Вызовутся деструкторы всех ЧЛЕНОВ класса (что были созданы на стеке) с самого нижнего до самого верхнего
+- Далее классы в строке НАСЛЕДОВАНИЯ С права налево, согласно строке наследования
+Тем самым очистка всех "автоматических" объектов выполнится корректно и утечёт только память для тех объектов, которые будут выделены в куче, через оператор new, ибо не факт, что для них будет вызван их delete (ведь скорее всего вызов delete для них как раз был бы в деструкторе класса, в конструкторе которого бросится исключение)
+
+```
+//Что выведется на экран :
+
+struct A0
+{
+	A0() { 
+		printf("_A0"); }
+	virtual ~A0() {
+		printf("_~A0");
+	}
+};
+struct A
+{
+	A() {
+		printf("_A"); }
+	virtual ~A() {
+		printf("_~A");
+	}
+};
+
+struct C
+{
+	C() {
+		printf("_C");
+	}
+	virtual ~C() {
+		printf("_~C");
+	}
+};
+struct CC
+{
+	CC() {
+		printf("_CC");
+	}
+	virtual ~CC() {
+		printf("_~CC");
+	}
+};
+struct CCC
+{
+	CCC() {
+		printf("_CCC");
+	}
+	virtual ~CCC() {
+		printf("_~CCC");
+	}
+};
+
+class D
+{
+public:
+	D() {
+		printf("_D");
+	}
+	~D() {
+		printf("_~D");
+	}
+};
+class E
+{
+public:
+	E() {
+		printf("_E");
+	}
+	~E() {
+		printf("_~E");
+	}
+};
+class F
+{
+public:
+	F() {
+		printf("_F");
+	}
+	~F() {
+		printf("_~F");
+	}
+};
+
+
+struct B : public A, CCC, CC
+{
+	B() {
+		printf("_B");
+		__f = new F;
+		throw 1;
+	}
+	~B() {
+		printf("_~B"); // из-за "trow 1;" не вызовется
+		delete __f; // из-за "trow 1;" не вызовется
+	}
+
+	D __d; // 1() //4~()
+	C __c; // 2() //3~()
+	E __e; // 3() //2~()
+	F* __f; // 4() //1 *__f = 0;
+};
+
+
+int main()
+{
+	// ИСКЛЮЧЕНИЕ В КОНСТРУКТОРЕ
+	// ИСКЛЮЧЕНИЕ БРОСАЕТ КОНСТРУКТОР
+	// B() { throw 1; }
+
+	/*
+	// EXAMPLE 1:
+	{
+		A*  test = new B; // (**) C ИСКЛЮЧЕНИЕМ
+		// _A_CCC_CC_D_C_E_B_F
+	}
+	//*/
+
+	//*
+	// EXAMPLE 2:
+	try
+	{
+		A0* a0 = new A0;
+		A*  aa = new A;
+		//B b; // (*) БЕЗ ИСКЛЮЧЕНИЯ
+		A*  ab = new B; // (**) C ИСКЛЮЧЕНИЕМ
+	}
+	catch (...)
+	{
+		1;
+		//return 1;
+	}
+	//*/
+
+	// (*) БЕЗ ИСКЛЮЧЕНИЯ В ~B() было бы так:
+	// _A0_A_A_CCC_CC_D_C_E_B_F _~B_~F_~E_~C_~D_~CC_~CCC_~A
+
+	// _A0
+	// _A
+	// B b;
+	// СОЗДАНИЕ:
+	// Наследники, Члены, сам Класс
+	// сначала классы в строке НАСЛЕДОВАНИЯ _A _CCC _CC (от B)
+	// в порядке объявления слева направо
+	// Далее ЧЛЕНЫ класса с первого верхнего _D _C _E
+	// Завершится всё конструктором самого   _B (+ _F внутри него)
+	//
+	// УДАЛЕНИЕ: 
+	// Cам класс, Члены, Наследники
+	// Начинается всё деструктором самого    _~B (+ _~F внутри него)
+	// сначала ЧЛЕНЫ класса с самого нижнего _~E _~C _~D_
+	// Далее классы в строке НАСЛЕДОВАНИЯ    _~CC _~CCC _~A
+	// С права налево
+
+	// (**) C ИСКЛЮЧЕНИЕМ
+	//_A0_A_A_CCC_CC_D_C_E_B_F _~E_~C_~D_~CC_~CCC_~A
+
+	// _A0
+	// _A
+	// A*  ab = new B;
+	// _A_CCC_CC_D_C_E_B_F _~E_~C_~D_~CC_~CCC_~A
+	// Деструктор самого класса _~B не вызовется (как и + _F внутри него),
+	// конструктор его не отработал, формально объект не создался, 
+	// НО
+	// деструкторы Членов класса (снизу вверх)
+	// и Наследников вызовутся как обычно (справа налево),
+	//*/
+
+	//* // SOLUTION_1
+	try
+	{
+		std::unique_ptr<A0> a0(new A0());
+		std::unique_ptr<A> aa(new A());
+		std::unique_ptr<B> ab(new B());
+	}
+	catch (...)
+	{
+		//return 1;
+		1;
+	}
+	
+	// _A0 _A _A_CCC_CC _D_C_E _B_F _~E_~C_~D _~CC_~CCC_~A _~A _~A0
+
+	//*/
+}
+```
+
+### Исключение в Деструкторе / Исключения в Деструкторе / Исключения в Деструкторах / Деструктор и исключение
+https://academy.yandex.ru/handbook/cpp/article/exceptions
+- В процессе обработки исключения, исключение не может исходить из самого деструктора, так как это считается ошибкой в работе механизма обработки исключений, приводящей к вызову std::terminate(); Однако деструктор может обрабатывать исключения, если написать внутри него блок try{}catch{}, которые генерируются вызываемыми им функциями, сам же деструктор не должен возбуждать исключений. Если быть точнее, то выброшенное исключение не должно покинуть фигурные скобки деструтора, ибо это приведёт к terminate()
+- Введя деструктор ~A(), компилятор неявно пометит его как "~A() noexcept(true)" - по умолчанию. Естветсвенно вызов исключения в нём приведёт к terminate()
+- Если мы хотим бросать из него исключения, то нам нужно пометить его специально как "~A() noexcept(false)" и к terminate() вызов исключения в нём уже более не приведёт
+- Если мы разрешаем объекту бросать исключение из деструктора, через пометку ~A() noexcept(false), то мы должны быть готовы к тому чтобы понимть про случай **Обработка двойного исключения** (смотри 2 вопросами выше). СУТЬ: ЕСЛИ в Блоке try происходит более одного исключения, то это приводит к вызову terminate().  
+```
+try  {
+  ExitBoom bomb;
+  throw 1;
+  // 1. throw 1
+  // 2. деструктор bomb, а в нём ещё один throw 2;
+  // 3. => terminate
+}
+catch (...) {
+  printf("catch");
+}
+}
+```
+
+ОСТАЛЬНЫЕ ПРИМЕРЫ:
+```
+Написав код
+class A
+{
+public:
+//компилятор неявно добавит ~A() noexcept(true)
+  ~A() {
+    throw 1; // terminate() / message "abort() has been called"
+  }
+};
+
+И вызвав
+try {
+  A a;
+}
+catch (...) {
+  int c = 0;
+}
+
+ПРЕДУПРЕЖДЕНИЕ В некоторых компиляторах мы 
+получим вывод с предупреждениями:
+
+1>app.cpp(11): warning C4297: 
+'A::~A': function assumed not to throw 
+         an exception but does
+		 
+1>app.cpp(11): note: destructor or deallocator 
+has a (possibly implicit) 
+non-throwing exception specification
+```
+- Случится terminate(), даже не смотря на наличие try{}catch{}-БЛОКА, ибо к деструктору неявно допишется noexcept(true) и будет "~A() noexcept(true)", что будет вызывать terminate для любого исключения, которое выбросится за пределы функции деструтора.
+
+Позволяем деструктору бросать исключения:
+```
+Написав код
+class A
+{
+public:
+   // компилятор неявно добавляет к деструтору ~A() noexcept(true)
+   // Но мы ЯВНО напишем noexcept(false), чтобы деструктор МОГ бросать исключения:
+  ~A() noexcept(false) {
+    throw 1; // terminate() не случится ->
+  }
+};
+
+И вызвав
+try {
+  A a;
+}
+catch (...) { // -> мы войдём в блок catch
+  int c = 0;
+}
+```
+- terminate() не случится, но и деструктор объекта не отработал полностью, так что вопрос с тем что произошло с объектом остаётся открытым
+
+**НЮАНС НОМЕР 2**
+- Базовые классы для класса у которого мы определяем ~() noexcept(false), тоже должны иметь приписку noexcept(false)
+```
+struct B : public A, CCC, CC
+{
+  B() {
+  printf("_B");
+  }
+  ~B() noexcept(false) {
+    printf("_~B"); // из-за "trow 1;" не вызовется
+    throw 1;
+  }
+}
+
+ОШИБКИ КОМПИЛЯЦИИ:  
+Error C2694 'B::~B(void) noexcept(false)': 
+overriding virtual function has less restrictive 
+exception specification than base class 
+virtual member function 'A::~A(void)'
+
+Error C2694 'B::~B(void) noexcept(false)': 
+--..-- 'CCC::~CCC(void)'
+Error C2694 'B::~B(void) noexcept(false)':
+--..-- 'CC::~CC(void)'
+```
+
+ПОСЛЕДНИЙ ПРИМЕР:
+```
+//Что выведется на экран :
+struct A0
+{
+	A0() { 
+		printf("_A0"); }
+	virtual ~A0() {
+		printf("_~A0");
+	}
+};
+struct A
+{
+	A() {
+		printf("_A"); }
+	virtual ~A() noexcept(false) {
+		printf("_~A");
+	}
+};
+
+struct C
+{
+	C() {
+		printf("_C");
+	}
+	virtual ~C() {
+		printf("_~C");
+	}
+};
+struct CC
+{
+	CC() {
+		printf("_CC");
+	}
+	virtual ~CC() noexcept(false) {
+		printf("_~CC");
+	}
+};
+struct CCC
+{
+	CCC() {
+		printf("_CCC");
+	}
+	virtual ~CCC() noexcept(false) {
+		printf("_~CCC");
+	}
+};
+
+class D
+{
+public:
+	D() {
+		printf("_D");
+	}
+	~D() {
+		printf("_~D");
+	}
+};
+class E
+{
+public:
+	E() {
+		printf("_E");
+	}
+	~E() {
+		printf("_~E");
+	}
+};
+class F
+{
+public:
+	F() {
+		printf("_F");
+	}
+	~F() {
+		printf("_~F");
+	}
+};
+
+
+struct B : public A, CCC, CC
+{
+	B() {
+		printf("_B");
+		__f = new F;
+		//throw 1;
+	}
+	~B() noexcept(false) {
+		printf("_~B");
+		delete __f;
+		throw 2;
+	}
+
+	D __d; // 1() //4~()
+	C __c; // 2() //3~()
+	E __e; // 3() //2~()
+	F* __f; // 4() //1 *__f = 0;
+};
+
+int main()
+{
+	// ИСКЛЮЧЕНИЕ В ДЕСтрукторе
+	// ИСКЛЮЧЕНИЕ БРОСАЕТ ДЕСтруктор
+	// ~B() { throw 2; }
+
+	// EXAMPLE 2:
+	try
+	{
+		A0* a0 = new A0;
+		A*  aa = new A;
+		B b; // (**) C ИСКЛЮЧЕНИЕМ В ДЕСтрукторе
+	}
+	catch (...)
+	{
+		return 1;
+	}
+	
+	/*
+	_A0 _A _A_CCC_CC _D_C_E _B_F _~B_~F _~E_~C_~D _~CC_~CCC_~A
+	
+	// _A0
+	// _A
+	// B b;
+	// СОЗДАНИЕ:
+	// Наследники, Члены, сам Класс
+	// сначала классы в строке НАСЛЕДОВАНИЯ _A _CCC _CC (от B)
+	// в порядке объявления слева направо
+	// Далее ЧЛЕНЫ класса с первого верхнего _D _C _E
+	// Завершится всё конструктором самого   _B (+ _F внутри него)
+	//
+	// УДАЛЕНИЕ: 
+	// Cам класс, Члены, Наследники
+	// Начинается всё деструктором самого    _~B (+ _~F внутри него)
+	// сначала ЧЛЕНЫ класса с самого нижнего _~E _~C _~D_
+	// Далее классы в строке НАСЛЕДОВАНИЯ    _~CC _~CCC _~A
+	// С права налево
+	*/
+}
+```
 
 ### Разница между abort() и exception()
 - abort() -> сразу terminate();
