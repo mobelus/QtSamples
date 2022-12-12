@@ -1529,7 +1529,7 @@ catch (...) {
 - ЕСЛИ в Блоке try происходит более одного исключения, то это приводит к вызову terminate()
 
 
-### Исключение в Конктрукторе / Исключения в Конктрукторе / Исключения в Конктрукторах / Конструктор и исключение
+### Исключение в Конструкторе / Исключения в Конструкторе / Исключения в Конструкторах / Конструктор и исключение
 Вот что написано в стандарте С++ 2011 пункт 15.2.2
 
 An object of any storage duration whose initialization or destruction is terminated by an exception will have destructors executed for all of its fully constructed subobjects (excluding the variant members of a union-like class), that is, for subobjects for which the principal constructor (12.6.2) has completed execution and the destructor has not yet begun execution. Similarly, if the non-delegating constructor for an object has completed execution and a delegating constructor for that object exits with an exception, the object’s destructor will be invoked. If the object was allocated in a new-expression, the matching deallocation function (3.7.4.2, 5.3.4, 12.5), if any, is called to free the storage occupied by the object.
@@ -1542,9 +1542,27 @@ An object of any storage duration whose initialization or destruction is termina
 - Далее классы в строке НАСЛЕДОВАНИЯ С права налево, согласно строке наследования
 Тем самым очистка всех "автоматических" объектов выполнится корректно и утечёт только память для тех объектов, которые будут выделены в куче, через оператор new, ибо не факт, что для них будет вызван их delete (ведь скорее всего вызов delete для них как раз был бы в деструкторе класса, в конструкторе которого бросится исключение)
 
+- БАЗОВАЯ гарантия - если не будет никаких утечек ресурсов и объект останется в **СОГЛАСОВАННОМ состоянии**
+- **new** - предоставляет СТРОГУЮ гарантию безопасности исключений. **ТРАНЗАКЦИОННОСТЬ**
+- ЕСЛИ мы для NEW 1. malloc выделили память и 2. ctor() выбросил исключение, ТО new гарантирует нам, освобождение этой памяти
+	
 ```
-//Что выведется на экран :
+class A { A() { throw 1; } };
+void main(){
+  try {
+    // new: 1. malloc
+    // new: 2. call ctror() of class
+    A* a = new A; // Утечки НЕ БУДЕТ
+    delete a; // Хотя и до delete a мы не дойдём
+  }
+  catch(..) {
+    // new гарантирует нам освобождение памяти
+  }
+}
+```
 
+// Что выведется на экран :	
+```
 struct A0
 {
 	A0() { 
