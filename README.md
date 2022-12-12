@@ -3194,14 +3194,14 @@ int reverseStr(int& n) //tCmplx: O(N) //Space: O(1)
 ```
 void reverseStr(string& str) //tCmplx: O(N) //Space: O(1)
 {
-    int n = str.length(); // Swap character starting from two corners
-    for (int i = 0; i < n / 2; i++) {
-        std::swap(str[i], str[(n - 1) - i]);
-		//or
-		//char temp = str[i];
-		//str[i] = str[ (len-1) - i];
-		//str[(len-1) - i] = temp;
-	}
+  int n = str.length(); // Swap character starting from two corners
+  for (int i = 0; i < n / 2; i++) {
+    std::swap(str[i], str[(n - 1) - i]);
+    //or
+    //char temp = str[i];
+    //str[i] = str[ (len-1) - i];
+    //str[(len-1) - i] = temp;
+  }
 }
 //#include <bits/stdc++.h> and std::reverse(str.begin(), str.end()); // Reverse str[begin..end]
 // OR  Use of reverse iterators => string rev = string(str.Rbegin(), str.Rend());
@@ -3408,41 +3408,40 @@ int myAtio(std::string a = "456")
 class DeleteAllSpacesFromString
 {
 public:
-    DeleteAllSpacesFromString();
-    ~DeleteAllSpacesFromString();
+ DeleteAllSpacesFromString();
+ ~DeleteAllSpacesFromString();
     
-    /// Решение с выделением доп памяти
-    std::string deleteAllSpacesFromString(const std::string& s)
-    {
-        std::string res;
-        for (auto symbol: s) {
-            if(symbol != ' ') {
-                res.push_back(symbol);
-            }
-        }
-        return res;
-    }
+ /// Решение с выделением доп памяти
+ std::string deleteAllSpacesFromString(const std::string& s)
+ {
+   std::string res;
+   for (auto symbol: s) {
+     if(symbol != ' ') {
+       res.push_back(symbol);
+     }
+   }
+   return res;
+ }
 
-    /// Решение БЕЗ выделения доп памяти
-    void deleteAllSpacesFromStringExtra(std::string& s)
-    {
-        for (int i = 0; i< s.size(); ++i) {
-            if (s[i] == ' ') {
-                for (int j = i + 1; j < s.size(); ++j) {
-                    if (s[j] != ' ') {
-                        s[i] = s[j];
-                        s[j] = ' ';
-                    }
-                }
-            }
-        }
-    }
-
+ /// Решение БЕЗ выделения доп памяти
+ void deleteAllSpacesFromStringExtra(std::string& s)
+ {
+   for (int i = 0; i< s.size(); ++i) {
+     if (s[i] == ' ') {
+       for (int j = i + 1; j < s.size(); ++j) {
+         if (s[j] != ' ') {
+           s[i] = s[j];
+           s[j] = ' ';
+         }
+       }
+     }
+   }
+ }
 };
 	
 ```
 
-### 8. Найти подстроку в строке
+### 8. Удалить все подстроки в строке
 
 ```
 #include <string>
@@ -3501,17 +3500,17 @@ int binary_find(int n, int *x, long A)
 int binarySearch(int arr[], int l, int r, int x)
 {
   if (r >= l) {
-      int mid = l + (r - l) / 2;
-      // If the element is present at the middle itself
-      if (arr[mid] == x)
-          return mid;
-      // If element is smaller than mid, then
-      // it can only be present in left subarray
-      if (arr[mid] > x)
-          return binarySearch(arr, l, mid - 1, x);
-      // Else the element can only be present
-      // in right subarray
-      return binarySearch(arr, mid + 1, r, x);
+    int mid = l + (r - l) / 2;
+    // If the element is present at the middle itself
+    if (arr[mid] == x)
+      return mid;
+    // If element is smaller than mid, then
+    // it can only be present in left subarray
+    if (arr[mid] > x)
+      return binarySearch(arr, l, mid - 1, x);
+    // Else the element can only be present
+    // in right subarray
+    return binarySearch(arr, mid + 1, r, x);
   }
   // We reach here when element is not present in array
   return -1;
@@ -3565,29 +3564,30 @@ int main()
 template<typename T>
 void bubble_sort(T array[], std::size_t size)
 {
-  for (std::size_t idx_i = 0; idx_i < size - 1; idx_i++)
+ for (std::size_t idx_i = 0; idx_i < size - 1; idx_i++)
+ {
+  for (std::size_t idx_j = 0; idx_j < size - idx_i - 1; idx_j++)
   {
-    for (std::size_t idx_j = 0; idx_j < size - idx_i - 1; idx_j++)
-    {
-      if (array[idx_j + 1] < array[idx_j])
-      {
-        std::swap(array[idx_j], array[idx_j + 1]);
-      }
-    }
+   if (array[idx_j + 1] < array[idx_j])
+   {
+    std::swap(array[idx_j], array[idx_j + 1]);
+   }
   }
+ }
 }
 ```
 ### 10.2 Сортировка  пузырьком улучшенный
 ```
 void bubbleSort(int* arrayPtr, int arrLen) // сортировка пузырьком
 {
- int temp = 0; // временная переменная для хранения элемента массива
- bool exit = false; // булевая переменная для выхода из цикла, если массив отсортирован
+  int temp = 0; // временная переменная для хранения элемента массива
+  bool exit = false; // булевая переменная для выхода из цикла, если массив отсортирован
  
- while (!exit) // пока массив не отсортирован
- {
-  exit = true;
-  for (int i = 0; i < (arrLen - 1); i++) // внутренний цикл
+  while (!exit) // пока массив не отсортирован
+  {
+    exit = true;
+    for (int i = 0; i < (arrLen - 1); i++)  // внутренний цикл
+    {
     //сортировка пузырьком по возрастанию - знак >
     //сортировка пузырьком по убыванию - знак <
     if (arrayPtr[i] > arrayPtr[i + 1]) // сравниваем два соседних элемента
@@ -3598,56 +3598,57 @@ void bubbleSort(int* arrayPtr, int arrLen) // сортировка пузырь�
      arrayPtr[i + 1] = temp;
      exit = false; // на очередной итерации была произведена перестановка элементов
     }
- }
+    }
+  }
 }
 ```
 
 ### 11. Развернуть linked_list
-``` 
+```
 // Link list node
 struct Node {
-    int data;
-    struct Node* next;
-    Node(int data)
-    {
-        this->data = data;
-        next = NULL;
-    }
+  int data;
+  struct Node* next;
+  Node(int data)
+  {
+    this->data = data;
+    next = NULL;
+  }
 };
- 
+
 struct LinkedList {
-    Node* head;
-    LinkedList() { head = NULL; } 
+  Node* head;
+  LinkedList() { head = NULL; } 
 	
-    // Function to reverse the linked list
-    void reverse()
-    {
-        // Initialize current, previous and next pointers
-        Node* current = head;
-        Node *prev = NULL, *next = NULL;
-        while (current != NULL) {
-            next = current->next; // Store next
-            current->next = prev; // Reverse current node's pointer
-            prev = current; // Move pointers one position ahead.
-            current = next;
-        }
-        head = prev;
+  // Function to reverse the linked list
+  void reverse()
+  {
+    // Initialize current, previous and next pointers
+    Node* current = head;
+    Node *prev = NULL, *next = NULL;
+    while (current != NULL) {
+      next = current->next; // Store next
+      current->next = prev; // Reverse current node's pointer
+      prev = current; // Move pointers one position ahead.
+      current = next;
     }
- 
-    void push(int data)
-    {
-        Node* temp = new Node(data);
-        temp->next = head;
-        head = temp;
-    }
+    head = prev;
+  }
+  
+  void push(int data)
+  {
+    Node* temp = new Node(data);
+    temp->next = head;
+    head = temp;
+  }
 };
  
 /* Driver code*/
 int main()
 {
-    /* Start with the empty list */
-    LinkedList ll;
-    ll.push(20);
+  /* Start with the empty list */
+  LinkedList ll;
+  ll.push(20);
 }
 ```
 
@@ -3692,14 +3693,14 @@ class Singleton
 class Singleton
 {
 private: 
-    Singleton() {}
-    Singleton( const Singleton&);  
-    Singleton& operator=( Singleton& );
+  Singleton() {}
+  Singleton( const Singleton&);  
+  Singleton& operator=( Singleton& );
 public:
-    static Singleton& getInstance() {
-        static Singleton  instance;
-        return instance;
-    }    
+  static Singleton& getInstance() {
+    static Singleton  instance;
+    return instance;
+  }    
 }; 
 ```	
 
