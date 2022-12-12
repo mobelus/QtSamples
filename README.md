@@ -2659,7 +2659,42 @@ Object::method(&object, 5);
 - Если у нас памяти мало, или есть выделенный участок
 - Если мы хотим облегчить нашу работу не обращаться к ОС для удаления или для создания, просто можем брать и создавать объкты и удалять их по одним и тем же указателям
 
-### Как запретить наследование от класса:
+### [Q] Как зпретить копирование объекта класса / Как защитить объект от копирования?
+РАНЬШЕ - Ответ: Сделать private конструктор копирования и оператор присваивания "="
+
+```
+struct NonCopyable
+{
+  NonCopyable() { }
+  private:
+  NonCopyable(const NonCopyable&)
+  NonCopyable& operator=(const NonCopyable&)
+};
+void main() {
+ NonCopyable a; 
+ NonCopyable b = a; // error C2248: 'NonCopyable::NonCopyable' : cannot access private member
+ a = b; // error C2248: 'NonCopyable::operator =' : cannot access private member
+}
+```
+
+ТЕПЕРЬ C++11:
+```
+struct NonCopyable
+{
+  NonCopyable() = default; // конструктор по умолчанию
+  NonCopyable(const NonCopyable&) = delete; // удалит метод из класса
+  NonCopyable& operator=(const NonCopyable&) = delete; // удалит метод из класса
+};
+void main() {
+ NonCopyable a; 
+ NonCopyable b = a; // error C2248: function N(c N&) cannot be referenced -- it is a deleted function
+ a = b; // error C2248: 'NonCopyable::operator =' cannot be referenced -- it is a deleted function
+}
+``` 
+
+подробнее тут - https://habrahabr.ru/company/abbyy/blog/142595/
+	
+### Как запретить наследование от класса / Как защитить наследование от класса::
 - Заприватить конструкторы 1. обычный 2. костр.КОПИИ 3. оператор присваивания
 - final - ТРЕБУЕТ УТОЧНЕНИЯ !!! - и нельзя будет наследоваться от этого класса ... 
 ```
