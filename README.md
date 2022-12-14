@@ -3992,7 +3992,9 @@ inline ullong str_hash_for_switch(const char* const str)
 8. Найти подстроку в строке
 9. Алгоритм Бинарного поиска / Бинарный/Двоичный поиск С++
 10. Поиск пузырьком
-
+11. Развернуть linked_list
+- unique_ptr - своими руками
+- shared_ptr - совими руками
 
 ### 1. Развернуть число
 
@@ -4463,14 +4465,307 @@ struct LinkedList {
   }
 };
  
-/* Driver code*/
 int main()
 {
-  /* Start with the empty list */
+  // Start with the empty list
   LinkedList ll;
   ll.push(20);
 }
 ```
+
+
+https://mainfunda.com/unique_ptr-auto_ptr/
+
+### unique_ptr своими руками
+
+```
+#include <iostream>  //main header
+using namespace std; //namespace
+
+template<typename T>
+class the_unique_ptr  //smart pointers implementation
+{
+    T* up_data = nullptr;
+
+    public:
+    the_unique_ptr(T* p) 
+    {
+        up_data = p;
+    }
+    
+    the_unique_ptr(const the_unique_ptr& up_rhs) = delete;
+    
+    the_unique_ptr(the_unique_ptr&& up_rhs)
+    {
+        up_data = std::move(up_rhs.up_data);
+        up_rhs.up_data = NULL;
+    }
+    the_unique_ptr& operator=
+            (const the_unique_ptr& up_rhs) = delete;
+
+    the_unique_ptr& operator=
+            (the_unique_ptr&& up_rhs)
+    {
+        up_data = std::move(up_rhs.up_data);
+
+        up_rhs.up_data = NULL;
+        return (*this);
+    }
+    T& operator*()
+    {
+        return (*up_data);
+    }
+    T* operator->()
+    {
+        return up_data;
+    }
+    ~the_unique_ptr()
+    {
+        cout << "Automatic clean-up" 
+             << endl;
+        if(up_data)
+            delete up_data;
+        up_data = NULL;
+    }
+};
+
+int main()
+{
+    the_unique_ptr<int> up1 = new int(2);
+    the_unique_ptr<int> up2 = std::move(up1);
+    *up2 = 4;
+    cout << *up2 << endl;
+
+    the_unique_ptr<std::string> up3 = 
+                       new std::string("mainfunda");
+    the_unique_ptr<std::string> up4 = std::move(up3);
+    cout << *up4 << endl;
+    cout << up4->size() << endl;
+
+    return 0;
+}
+```
+
+https://medium.com/analytics-vidhya/c-shared-ptr-and-how-to-write-your-own-d0d385c118ad
+
+https://www.geeksforgeeks.org/how-to-implement-user-defined-shared-pointers-in-c/
+
+https://gist.github.com/jakab922/e3b906e7438be7851109c08364696585
+
+### shared_ptr своими руками
+
+```
+#include <bits/stdc++.h>
+using namespace std;
+
+template <typename T>
+class my_shared_ptr {
+    T *data;
+    int *ref_count;
+
+    void _possibly_destroy() {
+        if (*ref_count == 0) {
+            delete data;
+            delete ref_count;
+            data = nullptr;
+            ref_count = nullptr;
+        }
+    }
+
+   public:
+    my_shared_ptr() : data{nullptr}, ref_count{nullptr} {}
+
+    my_shared_ptr(T *_data) : data{_data}, ref_count{new int{1}} {}
+
+    // copy constructor
+    my_shared_ptr(const my_shared_ptr<T> &other) {
+        data = other.data;
+        ref_count = other.ref_count;
+        (*ref_count)++;
+    }
+
+    // copy assignment operator
+    my_shared_ptr<T> &operator=(const my_shared_ptr<T> &other) {
+        if (other.data == data) return *this;
+        (*ref_count)--;
+        _possibly_destroy();
+        data = other.data;
+        ref_count = other.ref_count;
+        (*ref_count)++;
+        return *this;
+    }
+
+    //move constructor
+    my_shared_ptr(my_shared_ptr<T> &&other) {
+        data = other.data;
+        ref_count = other.ref_count;
+        other.reset();
+    }
+
+    // move assignment operator
+    my_shared_ptr<T> &operator=(my_shared_ptr<T> &&other) {
+        (*ref_count)--;
+        _possibly_destroy();
+        data = other.data;
+        ref_count = other.ref_count;
+        other.reset();
+        return *this;
+    }
+
+    ~my_shared_ptr() {
+        if (ref_count == nullptr) return;  // If it was resetted there isn't much to do here.
+        (*ref_count)--;
+        _possibly_destroy();
+    }
+
+    size_t use_count() const {
+        return *ref_count;
+    }
+
+    T *get() {
+        return data;
+    }
+
+    void reset() {
+        data = nullptr;
+        ref_count = nullptr;
+    }
+};
+
+int main() {
+    cout << "normal constructor" << endl;
+    my_shared_ptr<int> one{new int{1}};                      // normal constructor
+    cout << "one.use_count(): " << one.use_count() << endl;  // should be 1
+
+    cout << endl
+         << "copy constructor" << endl;
+    my_shared_ptr<int> other{one};                               // copy constructor;
+    cout << "one.use_count(): " << one.use_count() << endl;      // should be 2
+    cout << "other.use_count(): " << other.use_count() << endl;  // should also be 2
+    assert(one.get() == other.get());                            // They should point to the same object
+}
+```
+
+
+
+```
+
+#include <iostream>
+using namespace std;
+ 
+class Counter // Class representing a reference counter class
+{
+public:
+  Counter() : m_counter(0){};
+  ~Counter() {}
+ 
+  Counter(const Counter&) = delete;
+  Counter& operator=(const Counter&) = delete;
+ 
+  void reset() { m_counter = 0; }
+  unsigned int get() { return m_counter; }
+  // Overload post/pre increment
+  void operator++() { m_counter++; }
+  void operator++(int) { m_counter++; }
+  // Overload post/pre decrement
+  void operator--() { m_counter--; }
+  void operator--(int) { m_counter--; }
+ 
+  // Overloading << operator
+  friend ostream& operator<<
+    (ostream& os, const Counter& counter)
+  {
+    os << "Counter Value : " << counter.m_counter << endl;
+      return os;
+  }
+private:
+    unsigned int m_counter{};
+};
+ 
+// Class representing a shared pointer
+template <typename T>
+ 
+class Shared_ptr
+{
+public:
+    Shared_ptr(): m_ptr{nullptr}, m_counter{nullptr} {}
+    Shared_ptr(T *_data): m_ptr{_data}, m_counter{new Counter()}
+    {
+     (*m_counter)++;
+    }
+    // Constructor
+    explicit Shared_ptr(T* ptr = nullptr)
+    {
+        m_ptr = ptr;
+        m_counter = new Counter();
+        (*m_counter)++;
+    }
+ 
+    // Copy constructor
+    Shared_ptr(Shared_ptr<T>& sp)
+    {
+        m_ptr = sp.m_ptr;
+        m_counter = sp.m_counter;
+        (*m_counter)++;
+    }
+ 
+    // Reference count
+    unsigned int use_count()
+    { return m_counter->get(); }
+ 
+    // Get the pointer
+    T* get() { return m_ptr; }
+    // Overload * operator
+    T& operator*() { return *m_ptr; }
+    // Overload -> operator
+    T* operator->() { return m_ptr; }
+   
+    // Destructor
+    ~Shared_ptr()
+    {
+        (*m_counter)--;
+        if (m_counter->get() == 0)
+        {
+            delete m_counter;
+            delete m_ptr;
+        }
+    }
+ 
+    friend ostream& operator<<(ostream& os,
+                               Shared_ptr<T>& sp)
+    {
+        os << "Address pointed : " << sp.get() << endl;
+        os << *(sp.m_counter) << endl;
+        return os;
+    }
+ 
+private:
+  Counter* m_counter; // Reference counter
+  T* m_ptr; // Shared pointer
+};
+ 
+int main()
+{
+    // ptr1 pointing to an integer.
+    Shared_ptr<int> ptr1(new int(151));
+    cout << "--- Shared pointers ptr1 ---\n";
+    *ptr1 = 100;
+    cout << " ptr1's value now: " << *ptr1 << endl;
+    cout << ptr1;
+ 
+    {
+        // ptr2 pointing to same integer
+        // which ptr1 is pointing to
+        // Shared pointer reference counter
+        // should have increased now to 2.
+        Shared_ptr<int> ptr2 = ptr1;
+        cout << "--- Shared pointers ptr1, ptr2 ---\n";
+        cout << ptr1;
+        cout << ptr2;
+    }
+}
+```
+
 
 ===================================================================
 	
