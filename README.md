@@ -2537,18 +2537,18 @@ http://www.cyberforum.ru/cpp-beginners/thread921902.html
 	
 ### 2) Дедлоки (avoiding circular wait)
 - решается мьютексами
-    -- mutex - базовый мьютекс - mutex.lock() | mutex.unlock()
-    -- timed_mutex - мьютекс с тайм-аутом 
-    -- recursive_mutex - мьютекс, который может быть заблокирован рекурсивно из того же потока 
-    -- recursive_timed_mutex - мьютекс с таймаутом, который может быть заблокирован рекурсивно из того же потока 
-    -- shared_mutex - provides shared mutual exclusion facility 
-    -- shared_timed_mutex - provides shared mutual exclusion facility 
+    - mutex - базовый мьютекс - mutex.lock() | mutex.unlock()
+    - timed_mutex - мьютекс с тайм-аутом 
+    - recursive_mutex - мьютекс, который может быть заблокирован рекурсивно из того же потока 
+    - recursive_timed_mutex - мьютекс с таймаутом, который может быть заблокирован рекурсивно из того же потока 
+    - shared_mutex - provides shared mutual exclusion facility 
+    - shared_timed_mutex - provides shared mutual exclusion facility 
 - порядком обращения к месту, где случается деллок (правильный порядок захвата мьютексов и их отпускания)
 - std::lock_guard, std::unique_lock, std::try_to_lock, std::lock на мьютексах
-    -- lock_guard - реализует обёртку владения мьютексом строго в области видимости 
-    -- unique_lock - реализует подвижного мьютекс собственности обертку 
+    - lock_guard - реализует обёртку владения мьютексом строго в области видимости 
+    - unique_lock - реализует подвижного мьютекс собственности обертку 
 - condition_variable - решается условными переменными 
-    -- notify_all_at_thread_exit
+    - notify_all_at_thread_exit
 - семафоры как частный случай мьютекса
 
 - А так же для асинхронных уже не проблем а просто решений в 11 стандарте так же есть:
