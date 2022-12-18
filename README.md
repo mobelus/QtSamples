@@ -2554,6 +2554,176 @@ private:
 };
 ```
 
+### producer consumer c++11 своими руками
+
+https://gist.github.com/iikuy/8115191
+
+https://stackoverflow.com/questions/69453363/c11-simple-producer-consumer-multithreading
+	
+https://codereview.stackexchange.com/questions/84109/a-multi-threaded-producer-consumer-with-c11
+	
+- SMALL
+```
+#include <iostream>
+#include <thread>
+#include <condition_variable>
+#include <mutex>
+#include <chrono>
+#include <queue>
+#include <atomic>
+
+class Example {
+  int c = 0;
+  bool done = false;
+  queue<int> goods;
+  mutex mtx;
+  condition_variable cond_var;
+public:
+  //Producer:
+  void producer(int n) {
+  	// Consumer can't touch goods
+  	// until we finish. So no locks.
+  	for (int i = 0; i < n; ++i) {
+  		goods.push(i);
+  		c++;
+  	}
+  	// Tell consumer he can 
+  	unique_lock<mutex> lock(mtx);
+  	done = true;
+  	cond_var.notify_one();
+  }
+  void consumer() {
+  	unique_lock<mutex> lock(mtx);
+  	cond_var.wait(lock); //, [=]() {return done; });
+  	// Producer finished updates.
+  	// So we can simply loop over the goods and processes them
+  	while (!goods.empty()) {
+  		goods.pop();
+  		c--;
+  	}
+  }
+}; // Example
+
+void main()
+{
+  int valc = 0;
+  bool done = false;
+  std::thread t1(&Example::producer, 4);
+  std::thread t2(&Example::consumer);
+  t1.join();
+  t2.join();
+  std::cout << "Net: " << valc << endl;
+}
+```
+
+- BIG
+```
+#include <iostream>
+#include <thread>
+#include <deque>
+#include <mutex>
+#include <chrono>
+#include <condition_variable>
+
+class Buffer
+{
+public:
+  std::mutex cout_mu;
+public:
+  void add(int num) {
+    while (true) {
+      std::unique_lock<std::mutex> locker(mu);
+      cond.wait(locker, [this]() 
+	{ return buffer_.size() < size_; }
+      );
+      buffer_.push_back(num);
+      locker.unlock();
+      cond.notify_all();
+      return;
+    }
+  }
+  int remove() {
+    while (true)
+    {
+      std::unique_lock<std::mutex> locker(mu);
+      cond.wait(locker, [this]() 
+	{ return buffer_.size() > 0; }
+      );
+      int back = buffer_.back();
+      buffer_.pop_back();
+      locker.unlock();
+      cond.notify_all();
+      return back;
+    }
+  }
+  Buffer() {}
+private:
+  // Add them as member variables here
+  std::mutex mu;
+  std::condition_variable cond;
+
+  // Your normal variables here
+  deque<int> buffer_;
+  const unsigned int size_ = 10;
+};
+
+class Producer
+{
+public:
+  Producer(Buffer& buffer)
+  	: buffer_(buffer)
+  {}
+  void run() {
+    while (true) {
+      int num = std::rand() % 100;
+      buffer_.add(num);
+      {
+      	std::unique_lock<std::mutex> locker(buffer_.cout_mu);
+      	std::cout << "Produced: " << num << std::endl;
+      }
+      std::this_thread::sleep_for(std::chrono::milliseconds(50));
+    }
+  }
+private:
+  Buffer&  buffer_;
+};
+
+class Consumer
+{
+public:
+  Consumer(Buffer& buffer)
+  	: buffer_(buffer)
+  {}
+  void run() {
+    while (true) {
+      int num = buffer_.remove();
+      {
+      	std::unique_lock<std::mutex> locker(buffer_.cout_mu);
+      	std::cout << "Consumed: " << num << std::endl;
+      }
+      std::this_thread::sleep_for(std::chrono::milliseconds(50));
+    }
+  }
+private:
+  Buffer&  buffer_;
+};
+
+int main()
+{
+  Buffer b;
+  Producer p(b);
+  Consumer c(b);
+
+  std::thread producer_thread(&Producer::run, &p);
+  std::thread consumer_thread(&Consumer::run, &c);
+
+  producer_thread.join();
+  consumer_thread.join();
+  getchar();
+  //return 0;
+}
+```
+	
 ### threadpool / thread_pool / thread pool своими руками
 
 https://www.youtube.com/watch?v=Ck5w-qNcKaw&t=1s
@@ -5031,12 +5201,64 @@ int main()
 
 https://en.wikipedia.org/wiki/Double-checked_locking
 
+https://stackoverflow.com/questions/1008019/c-singleton-design-pattern/1008289#1008289
+	
 С С++11 проблемы больше для поддержки потоков ничего и не надо. Но до полной его поддержки всеми компиляторами надо ещё дожить.
 ```	
-Singleton& GetInstance() {
-  static Singleton s;
-  return s;
-}
+class S
+{
+public:
+  static S& getInstance()
+  {
+    static S instance;
+    return instance;
+  }
+private:
+  S() {}                    
+  S(S const&);             
+  void operator=(S const&);
+public:
+    S(S const&)               = delete;
+    void operator=(S const&)  = delete;
+};
+```
+
+
+```
+class S
+{
+    public:
+        static S& getInstance()
+        {
+            static S    instance; // Guaranteed to be destroyed.
+                                  // Instantiated on first use.
+            return instance;
+        }
+    private:
+        S() {}                    // Constructor? (the {} brackets) are needed here.
+
+        // C++ 03
+        // ========
+        // Don't forget to declare these two. You want to make sure they
+        // are inaccessible(especially from outside), otherwise, you may accidentally get copies of
+        // your singleton appearing.
+        S(S const&);              // Don't Implement
+        void operator=(S const&); // Don't implement
+
+        // C++ 11
+        // =======
+        // We can use the better technique of deleting the methods
+        // we don't want.
+    public:
+        S(S const&)               = delete;
+        void operator=(S const&)  = delete;
+
+        // Note: Scott Meyers mentions in his Effective Modern
+        //       C++ book, that deleted functions should generally
+        //       be public as it results in better error messages
+        //       due to the compilers behavior to check accessibility
+        //       before deleted status
+};	
 ```
 	
 ### Q: Синглтон Класс (небезопасный в многопоточном окружении до С++11)
