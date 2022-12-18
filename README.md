@@ -2557,9 +2557,13 @@ private:
 ### threadpool / thread_pool / thread pool своими руками
 
 https://www.youtube.com/watch?v=Ck5w-qNcKaw&t=1s
+	
+https://github.com/mtrebi/thread-pool
 
 https://habr.com/ru/post/656515/
 
+https://riptutorial.com/cplusplus/example/15806/create-a-simple-thread-pool
+	
 ```
 #include <iostream>
 #include <thread>
@@ -4652,6 +4656,7 @@ https://www.cppstories.com/2018/07/string-view-perf-followup/
 
 - STD::STRING MY
 ```
+123
 ```
 
 - STD::STRING
