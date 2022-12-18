@@ -2554,193 +2554,116 @@ private:
 };
 ```
 
-### threadpool своими руками
+### threadpool / thread_pool / thread pool своими руками
+
+https://www.youtube.com/watch?v=Ck5w-qNcKaw&t=1s
+
 https://habr.com/ru/post/656515/
+
 ```
 #include <iostream>
-#include <queue>
 #include <thread>
-#include <chrono>
 #include <mutex>
-#include <future>
-#include <unordered_set>
-#include <atomic>
-
+#include <queue>
+#include <memory>
 #include <vector>
-#include <chrono>
+#include <utility>
+#include <functional>
+#include <condition_variable>
+#include <stdexcept>
+#include <ctime>
+#include <cstdlib>
 
-// C++ 14
-class thread_pool {
+class thread_pool
+{
 public:
-    thread_pool(uint32_t num_threads) {
-        threads.reserve(num_threads);
-        for (uint32_t i = 0; i < num_threads; ++i) {
-            threads.emplace_back(&thread_pool::run, this);
-        }
-    }
+  explicit thread_pool(std::size_t thread_count = std::thread::hardware_concurrency())
+  {
+    if(!thread_count)
+    	throw std::invalid_argument("bad thread count! must be non-zero!");
 
-    template <typename Func, typename ...Args>
-    int64_t add_task(const Func& task_func, Args&&... args) {
-        int64_t task_idx = last_idx++;
+    m_threads.reserve(thread_count);
 
-        std::lock_guard<std::mutex> q_lock(q_mtx);
-        q.emplace(std::async(std::launch::deferred, task_func, args...), task_idx);
-        q_cv.notify_one();
-        return task_idx;
+    for(auto i = 0; i < thread_count; ++i)
+    {
+    	m_threads.push_back(std::thread([this]()
+    	{
+          while(true)
+          {
+            work_item_ptr_t work{nullptr};
+            {
+            	std::unique_lock guard(m_queue_lock);
+            	m_condition.wait(guard, [&]() { return !m_queue.empty(); });
+            	work = std::move(m_queue.front());
+            	m_queue.pop();
+            }
+            if(!work)
+            {
+            	break;
+            }
+            (*work)();
+          }
+    	}));
     }
+  }
 
-    void wait(int64_t task_id) {
-        std::unique_lock<std::mutex> lock(completed_task_ids_mtx);
-        completed_task_ids_cv.wait(lock, [this, task_id]()->bool {
-            return completed_task_ids.find(task_id) != completed_task_ids.end();
-            });
+  ~thread_pool()
+  {
+    {
+    	std::unique_lock guard(m_queue_lock);
+    	for(auto& t : m_threads)
+    		m_queue.push(work_item_ptr_t{nullptr});
     }
+    for(auto& t : m_threads)
+    	t.join();
+  }
 
-    void wait_all() {
-        std::unique_lock<std::mutex> lock(q_mtx);
-        completed_task_ids_cv.wait(lock, [this]()->bool {
-            std::lock_guard<std::mutex> task_lock(completed_task_ids_mtx);
-            return q.empty() && last_idx == completed_task_ids.size();
-            });
-    }
+  thread_pool(const thread_pool&) = delete;
+  thread_pool(thread_pool&&) = delete;
+  thread_pool& operator = (const thread_pool&) = delete;
+  thread_pool& operator = (thread_pool&&) = delete;
 
-    bool calculated(int64_t task_id) {
-        std::lock_guard<std::mutex> lock(completed_task_ids_mtx);
-        if (completed_task_ids.find(task_id) != completed_task_ids.end()) {
-            return true;
-        }
-        return false;
-    }
+  using work_item_t = std::function<void(void)>;
 
-    ~thread_pool() {
-        quite = true;
-        for (uint32_t i = 0; i < threads.size(); ++i) {
-            q_cv.notify_all();
-            threads[i].join();
-        }
+  void do_work(work_item_t wi)
+  {
+    auto work_item = std::make_unique<work_item_t>(std::move(wi));
+    {
+    	std::unique_lock guard(m_queue_lock);
+    	m_queue.push(std::move(work_item));
     }
+    m_condition.notify_one();
+  }
 
 private:
+  using work_item_ptr_t = std::unique_ptr<work_item_t>;
+  using work_queue_t = std::queue<work_item_ptr_t>;
 
-    void run() {
-        while (!quite) {
-            std::unique_lock<std::mutex> lock(q_mtx);
-            q_cv.wait(lock, [this]()->bool { return !q.empty() || quite; });
+  work_queue_t m_queue;
+  std::mutex m_queue_lock;
+  std::condition_variable m_condition;
 
-            if (!q.empty()) {
-                auto elem = std::move(q.front());
-                q.pop();
-                lock.unlock();
-
-                elem.first.get();
-
-                std::lock_guard<std::mutex> lock(completed_task_ids_mtx);
-                completed_task_ids.insert(elem.second);
-
-                completed_task_ids_cv.notify_all();
-            }
-        }
-    }
-
-    std::queue<std::pair<std::future<void>, int64_t>> q; // очередь задач - хранит функцию(задачу), которую нужно исполнить и номер данной задачи
-    std::mutex q_mtx;
-    std::condition_variable q_cv;
-
-    std::unordered_set<int64_t> completed_task_ids;      // помещаем в данный контейнер исполненные задачи
-    std::condition_variable completed_task_ids_cv;
-    std::mutex completed_task_ids_mtx;
-
-    std::vector<std::thread> threads;
-
-
-    std::atomic<bool> quite{ false };                    // флаг завершения работы thread_pool
-    std::atomic<int64_t> last_idx = 0;                   // переменная хранящая id который будет выдан следующей задаче
+  using threads_t = std::vector<std::thread>;
+  threads_t m_threads;
 };
 
-
-void test_func(int& res, const std::vector<int>& arr) {
-    using namespace std::chrono_literals;
-    res = 0;
-    for (int i = arr.size() - 1; i >= 0; --i) {
-        for (int j = 0; j < arr.size(); ++j) {
-            res += arr[i] + arr[j];
-        }
-    }
-}
-
-
-void thread_pool_test(std::vector<int> ans, std::vector<int> arr) {
-    auto begin = std::chrono::high_resolution_clock::now();
-
-    thread_pool t(6);
-    for (int i = 0; i < ans.size(); ++i) {
-        t.add_task(test_func, std::ref(ans[i]), std::ref(arr));
-    }
-    t.wait_all();
-
-    auto end = std::chrono::high_resolution_clock::now();
-    std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
-}
-
-void without_thread_test(std::vector<int> ans, std::vector<int> arr) {
-
-    auto begin = std::chrono::high_resolution_clock::now();
-    for (int i = 0; i < ans.size(); ++i) {
-        test_func(std::ref(ans[i]), std::ref(arr));
-    }
-    auto end = std::chrono::high_resolution_clock::now();
-    std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
-}
-
-void raw_thread_test(std::vector<int> ans, std::vector<int> arr) {
-    auto begin = std::chrono::high_resolution_clock::now();
-
-    for (int i = 0; i < ans.size() / 6; ++i) {
-        std::thread t1(test_func, std::ref(ans[i]), std::ref(arr));
-        std::thread t2(test_func, std::ref(ans[i]), std::ref(arr));
-        std::thread t3(test_func, std::ref(ans[i]), std::ref(arr));
-        std::thread t4(test_func, std::ref(ans[i]), std::ref(arr));
-        std::thread t5(test_func, std::ref(ans[i]), std::ref(arr));
-        std::thread t6(test_func, std::ref(ans[i]), std::ref(arr));
-
-        t1.join(); t2.join(); t3.join(); t4.join(); t5.join(); t6.join();
-    }
-
-    auto end = std::chrono::high_resolution_clock::now();
-    std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
-}
-
-void run_test() {
-    std::vector<int> ans(24);
-    std::vector<int> arr1(10000);
-    thread_pool_test(ans, arr1);//  52474
-    without_thread_test(ans, arr1); // 83954
-    raw_thread_test(ans, arr1); // 62386
-}
-
-class Test {
-public:
-    void operator() () {
-        std::cout << "Working with functors!\n";
-    }
-};
-
-void sum(int a, int b) {
-    std::cout << a + b << std::endl;
-}
-
-int main() {
-    //run_test();
-
-    Test test;
-    auto res = std::bind(sum, 2, 3);
-
-    thread_pool t(3);
-    t.add_task(test);
-    t.add_task(res);
-    t.wait_all();
-
-    return 0;
+int main()
+{
+  using namespace std;
+  srand(time(NULL));
+  mutex cout_guard;  
+  cout << "main thread ID: " << this_thread::get_id() << endl;  
+  thread_pool tp;  
+  for(auto i = 1; i <= 50; i++)
+  {
+    tp.do_work([&, i = i]() {
+      {
+  	unique_lock guard(cout_guard);
+  	  cout << "doing work " << i << "..." << endl;
+  	}
+  	this_thread::sleep_for(chrono::milliseconds(rand() % 1000));
+    });
+  }
 }
 ```
 
