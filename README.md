@@ -4166,6 +4166,7 @@ inline ullong str_hash_for_switch(const char* const str)
 9. Алгоритм Бинарного поиска / Бинарный/Двоичный поиск С++
 10. Поиск пузырьком
 11. Развернуть linked_list
+12. split / split_string / split string своими руками
 - unique_ptr - своими руками
 - shared_ptr - совими руками
 
@@ -4646,6 +4647,55 @@ int main()
 }
 ```
 
+### 12 split / spli_string / split string своими руками
+https://www.cppstories.com/2018/07/string-view-perf-followup/
+
+- STD::STRING MY
+```
+```
+
+- STD::STRING
+```
+std::vector<std::string> my_split(const std::string& str, const std::string& delims = " ")
+{
+  std::vector<std::string> output;
+  auto first = std::cbegin(str);
+
+  while (first != std::cend(str))
+  {
+    const auto second = std::find_first_of(first, std::cend(str), 
+              std::cbegin(delims), std::cend(delims));
+
+    if (first != second)
+        output.emplace_back(first, second);
+    if (second == std::cend(str))
+        break;
+    first = std::next(second);
+  }
+  return output;
+}
+```
+
+- STD::STRING_VIEW
+```
+std::vector<std::string_view>
+splitSV(std::string_view strv, std::string_view delims = " ")
+{
+  std::vector<std::string_view> output;
+  size_t first = 0;
+
+  while (first < strv.size())
+  {
+    const auto second = strv.find_first_of(delims, first);
+    if (first != second)
+        output.emplace_back(strv.substr(first, second-first));
+    if (second == std::string_view::npos)
+        break;
+    first = second + 1;
+  }
+  return output;
+}
+```
 
 https://mainfunda.com/unique_ptr-auto_ptr/
 
