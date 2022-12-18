@@ -4452,18 +4452,20 @@ using namespace std;
 template<typename T>
 void removeSubstrs
 (
-  basic_string<T>& str,
+  basic_string<T> &s,
   const basic_string<T>& psub
 )
 {
-  basic_string<T>::size_type n = psub.length();
+  size_t n = psub.length();
 
-  for( basic_string<T>::size_type i = str.find(psub);
-       i != basic_string<T>::npos;
-       i = str.find(psub)
+  for
+  (
+    size_t i = s.find(psub);
+    i != basic_string<T>::npos;
+    i = s.find(psub)
   )
   {
-    str.erase(i, n);
+    s.erase(i, n);
   }
 }
 
@@ -4471,6 +4473,7 @@ int main()
 {
    string s = "One fish, two fish, red fish, blue fish";
    string p = "fish";
+   string sorig(s);
    removeSubstrs(s, p);
    cout << s << '\n';
 }
