@@ -4656,14 +4656,14 @@ https://www.cppstories.com/2018/07/string-view-perf-followup/
 
 - STD::STRING MY
 ```
-std::vector<std::string> new_split(const std::string& source, const std::string& delimiters = " ") {
+std::vector<std::string> my_split(const std::string& source, const std::string& delimiters = " ") {
   std::size_t prev = 0;
   std::size_t currentPos = 0;
   std::vector<std::string> results;
 
   while 
   (
-    (currentPos = source.find_first_of(delimiters, prev))
+    currentPos = source.find_first_of(delimiters, prev)
     != std::string::npos
   )
   {
@@ -4681,24 +4681,27 @@ std::vector<std::string> new_split(const std::string& source, const std::string&
 
 - STD::STRING
 ```
-std::vector<std::string> my_split(const std::string& str, const std::string& delims = " ")
+#include <algorithm>
+std::vector<std::string> my_str_split
+  (const std::string& str, const std::string& delims = " ")
 {
   std::vector<std::string> output;
-  auto first = std::cbegin(str);
+  auto s_begin_or_next = str.cbegin();
 
-  while (first != std::cend(str))
+  while (s_begin_or_next != str.cend())
   {
-    const auto second = std::find_first_of
+    auto s_delim_pos = std::find_first_of
     (
-	first, std::cend(str), 
-        std::cbegin(delims), std::cend(delims)
+      s_begin_or_next, str.cend(),
+      delims.cbegin(), delims.cend()
     );
 
-    if (first != second)
-        output.emplace_back(first, second);
-    if (second == std::cend(str))
-        break;
-    first = std::next(second);
+    if (s_begin_or_next != s_delim_pos)
+    	output.emplace_back(s_begin_or_next, s_delim_pos);
+    if (s_delim_pos == str.cend())
+    	break;
+    //s_begin_or_next = std::next(s_delim_pos);
+    s_begin_or_next = ++s_delim_pos;
   }
   return output;
 }
@@ -4707,7 +4710,7 @@ std::vector<std::string> my_split(const std::string& str, const std::string& del
 - STD::STRING_VIEW
 ```
 std::vector<std::string_view>
-splitSV(std::string_view strv, std::string_view delims = " ")
+split_sv(std::string_view strv, std::string_view delims = " ")
 {
   std::vector<std::string_view> output;
   size_t first = 0;
