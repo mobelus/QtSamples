@@ -4656,7 +4656,27 @@ https://www.cppstories.com/2018/07/string-view-perf-followup/
 
 - STD::STRING MY
 ```
-123
+std::vector<std::string> new_split(const std::string& source, const std::string& delimiters = " ") {
+  std::size_t prev = 0;
+  std::size_t currentPos = 0;
+  std::vector<std::string> results;
+
+  while 
+  (
+    (currentPos = source.find_first_of(delimiters, prev))
+    != std::string::npos
+  )
+  {
+    if (currentPos > prev) {
+      results.push_back(source.substr(prev, currentPos - prev));
+    }
+    prev = currentPos + 1;
+  }
+  if (prev < source.length()) {
+    results.push_back(source.substr(prev));
+  }
+  return results;
+}
 ```
 
 - STD::STRING
@@ -4668,8 +4688,11 @@ std::vector<std::string> my_split(const std::string& str, const std::string& del
 
   while (first != std::cend(str))
   {
-    const auto second = std::find_first_of(first, std::cend(str), 
-              std::cbegin(delims), std::cend(delims));
+    const auto second = std::find_first_of
+    (
+	first, std::cend(str), 
+        std::cbegin(delims), std::cend(delims)
+    );
 
     if (first != second)
         output.emplace_back(first, second);
