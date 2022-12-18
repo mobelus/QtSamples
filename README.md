@@ -725,7 +725,44 @@ D d;
 d.B::x;
 d.C::x;
 ```
+
+### PUBLIC PROTECTED PRIVATE наследование
 	
+http://alenacpp.blogspot.com/2006/03/blog-post_11.html
+
+```
+1) public:-> Для производного
+public    -> public
+protected -> protected
+private   -> private
+
+CDerived dd;
+//dd.privateBase=3;
+//dd.protBase=3;
+dd.pubBase=3; //pubBase остался с уровнем доступа public, 
+              //к нему теперь можно доступиться.
+	
+2) protected: -> Для производного
+public	  -> protected
+protected -> protected
+private	  -> private
+
+CDerived dd;
+//dd.privateBase=3; недоступно
+//dd.protBase=3; недоступно
+//dd.pubBase=3; недоступно
+	
+3) private: -> Для производного
+public	  -> private
+protected -> private
+private	  -> private
+
+При вызове извне, доступиться не получится ни к чему
+CDerived dd;
+//dd.privateBase=3; недоступно
+//dd.protBase=3; недоступно
+//dd.pubBase=3; недоступно
+```
 
 https://tproger.ru/articles/move-semantics-and-rvalue/
 
