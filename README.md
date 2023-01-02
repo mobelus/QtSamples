@@ -5615,6 +5615,12 @@ CONS in general: OVERENGENEERING
 
 # EVERY DAY
 
+- 80
+https://www.geeksforgeeks.org/top-10-algorithms-in-interview-questions/
+- 7
+https://medium.com/pythoneers/7-must-know-algorithms-for-your-next-coding-interview-26252748b895
+
+
 ### class methods
 То есть объявление class A {} может быть эквивалентно следующему:
 ```
