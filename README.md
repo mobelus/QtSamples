@@ -5583,4 +5583,62 @@ WE had only a CONDITION_VARIABLE to notify both threads that something went wron
 
 CONS in general: OVERENGENEERING
 
+# EVERY DAY
 
+### class methods
+То есть объявление class A {} может быть эквивалентно следующему:
+```
+  A() {} 
+  ~A() {} 
+  A(const A& that) {}
+  A& operator=(const A& that) {}
+  A(A&& that) {} // C++11
+  A& operator=(A&& that) {} // C++11
+};
+```
+
+### Singleton OLD
+
+```
+class Singleton {  
+public:
+  static Singleton* getInstance() 
+  {
+    if (theInstance == nullptr )
+    { theInstance = new Singleton(); }
+    return theInstance;
+  }
+ private:    
+   static Singleton* theInstance;
+   
+   Singleton() { }
+};
+
+Singleton* Singleton::theInstance = nullptr;
+```
+
+### Singleton MAYERS
+
+```
+// initialized the first time control passes to 
+// this declaration. Ignored on subsequent calls.
+// Since C++11, If multiple threads attempt to 
+// initialize the same static local variable concurrently,
+// the initialization is still guaranteed to occur 
+// exactly once. see 
+// https://en.cppreference.com/w/cpp/language/storage_duration#Static_local_variables
+
+class Singleton
+{
+public:
+  static Singleton& instance()
+  {
+    static Singleton s; 
+    return s;
+  }
+private:
+  Singleton() {}
+  Singleton(const Singleton &) = delete;
+  Singleton& operator= (const Singleton &) = delete;
+};
+```
