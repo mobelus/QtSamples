@@ -5723,3 +5723,190 @@ int main()
   return 0;
 }
 ```
+
+### Custom String mystring with Iterators implementation
+https://gist.github.com/philipheimboeck/099e540d800063e3e6ec
+
+```
+
+#include <string.h>
+#include <iostream>
+
+template<typename T>
+class It {
+private:
+  T* data;
+public:
+  It(T* data)
+  {	this->data = data; }
+  T &operator*()
+  { return *data; }
+  bool operator==(const It<T> &a)
+  { return data == a.data; }
+  bool operator!=(const It<T> &a)
+  { return data != a.data; }
+  It<T> &operator++() {
+    data++;
+    return *this;
+  }
+};
+
+class String {
+  // Friend to implement the ostream operator <<
+  friend std::ostream &operator<<(std::ostream &iostream, const MyString::String &string);
+private:
+  char* data;
+  size_t size;
+public:
+  String(const char* data);
+  String(size_t init_size = 20);
+  String(const String &string);
+  ~String();
+  char* getText();
+  void setText(const char* text);
+  size_t getLength() const; // length (\0 is end)
+  
+  //
+  // Set the length of the string
+  // If the new length is smaller than its data, everything beyond will be cur
+  // If the new length is bigger, all elements will be initialized with \0
+  // 
+  void setLength(size_t size);
+  void add(const String &text);
+  char get(size_t pos) const;
+  bool compare(const String &string) const;
+  // Operators
+  char operator[](size_t pos);
+  // Iterator
+  It<char> begin() {
+    It<char> it(data);
+    return it;
+  }
+  It<char> end()
+  {
+    It<char> it(data + size);
+    return it;
+  }
+};
+
+// Free operator methods
+String operator+(const String &string1, const String &string2);
+bool operator==(const String &string1, const String &string2);
+std::ostream &operator<<(std::ostream &iostream, const MyString::String &string);
+
+// Ctor with empty initialization
+String::String(size_t init_size) {
+  this->data = new char[init_size];
+  this->size = init_size;
+  
+  if (this->data != NULL) {
+    for (size_t i = 0; i < init_size; i++) {
+      data[i] = '\0';
+    }
+  }
+}
+
+// Ctor with char*
+String::String(const char* data) {
+  size_t size = strlen(data);
+  
+  this->data = new char[size];
+  this->size = size;
+  
+  if (this->data != NULL) {
+    strncpy(this->data, data, size);
+  }
+}
+
+// Copy Ctor
+String::String(const String &string) {
+  this->size = string.getLength();
+  this->data = new char[this->size];
+  
+  if (this->data != NULL) {
+    strncpy(this->data, string.data, this->size);
+  }
+}
+
+// Destructor
+String::~String() {
+  if (this->data != NULL)
+    delete[] this->data;
+}
+
+// Methods
+char* String::getText() {
+  return data;
+}
+
+void String::setText(const char* text) {
+  delete[] this->data;
+  
+  this->size = strlen(text);
+  this->data = new char[this->size];
+  
+  strncpy(this->data, text, this->size);
+}
+
+size_t String::getLength() const {
+  return strlen(this->data);
+}
+
+void String::setLength(size_t size) {
+  size_t old_length = this->getLength();
+  char* old_data = this->data;
+  
+  this->size = size;
+  this->data = new char[size];
+  
+  // Copy the characters (or add \0 if there are no characters anymore).
+  for (size_t i = 0; i < size; i++) {
+    if (i < old_length) {
+      this->data[i] = old_data[i];
+    }
+    else {
+      this->data[i] = '\0';
+    }
+  }
+
+  delete[] old_data; // Destroy the old data
+  this->data[size] = '\0'; // Ensure that the last element is \0
+}
+
+void String::add(const String &text) {
+  size_t new_size = this->size + text.size;
+  setLength(new_size);
+  
+  size_t length = getLength();
+  for (size_t i = length; i < new_size; i++) {
+    this->data[i] = text.data[i - length];
+  }
+}
+char String::get(size_t pos) const {
+  if (pos > getLength()) {
+    return '\0';
+  }
+  return data[pos];
+}
+bool String::compare(const String &string) const {
+  return strcmp(this->data, string.data) == 0;
+}
+char String::operator[](size_t pos) {
+  return this->get(pos);
+}
+
+// Free Operator Methods
+String operator+(const String &string1, const String &string2) {
+  String string = String(string1);
+  string.add(string2);
+  
+  return string;
+}
+bool operator==(const String &string1, const String &string2) {
+  return string1.compare(string2);
+}
+std::ostream &operator<<(std::ostream &ostream, const MyString::String &string) {
+  return (ostream << string.data);
+}
+
+```
