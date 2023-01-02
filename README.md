@@ -5662,3 +5662,64 @@ private:
   Singleton& operator= (const Singleton &) = delete;
 };
 ```
+
+### Custom String mystring implementation
+
+```
+#include <cstring>
+#include <iostream>
+using namespace std;
+ 
+class Mystring {
+  char* str; // Init char array
+public:
+  Mystring(); // No arguments Ctor
+  Mystring(char* val); // Ctor with 1 arguments
+  Mystring(const Mystring& source); // Copy Ctor
+  Mystring(Mystring&& source);
+  ~Mystring() { delete str; }
+};
+ 
+// Ctor with no arguments
+Mystring::Mystring() : str{nullptr} {
+  str = new char[1];
+  str[0] = '\0';
+}
+
+Mystring::Mystring(char* val) { // Ctor with one arguments
+  if (val == nullptr) {
+    str = new char[1];
+    str[0] = '\0';
+  }
+  else {
+    str = new char[strlen(val) + 1];
+    strcpy(str, val); // Copy character of val[] using strcpy
+    str[strlen(val)] = '\0';
+  }
+}
+ 
+Mystring::Mystring(const Mystring& source) { // Copy Ctor
+  str = new char[strlen(source.str) + 1];
+  strcpy(str, source.str);
+  str[strlen(source.str)] = '\0';
+}
+ 
+Mystring::Mystring(Mystring&& source) { // Move Constructor
+  str = source.str;
+  source.str = nullptr;
+}
+ 
+int main()
+{
+  Mystring a; // Constructor with no arguments
+  char temp[] = "Hello"; // Convert string literal to char array
+  Mystring b{ temp }; // Ctor with one argument
+  Mystring c{ a }; // Copy ctor
+  char temp1[] = "World";
+  // One arg constructor called,
+  // then the move constructor
+  Mystring d{ Mystring{ temp } };
+  
+  return 0;
+}
+```
