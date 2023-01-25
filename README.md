@@ -4664,32 +4664,42 @@ int my_pow(int n, int p) // num^pow
 }
 ```
 
+### 4.0 Факториал ПРОБЛЕМЫ
+
+Вычисляя фактореал, мы быстро упрёмся в верхнюю границу для int, unsigned int  даже для long long int, то есть наша функция будет иметь оагрниченный набор входных параметров, ибо сам фактореал растёт супербыстро, даже для небольших входных n, пример: 
+1. Для integer / unsigned integer –> упрёмся уже в границу при n <= 12
+2. Для long long int –> упрёмся в границу при n<=19
+Следовательно, для вычисления n!, где n>19, потребуется что-то более сложное, чем простые операции умножения (см. ниже 4.4)
+
 ### 4.1 Факториал (Итеративный) A: IN 5 OUT 125 (1x2x3x4x5)
 ```
-int my_fact(int b)
+unsigned int my_fact(unsigned int n)
 {
-  if(b<0) return 0; // или ОШИБКА !
-  
-  int c = 1;
-  for(int i=1; i<b+1; i++)
-  { c = c * i; }
-  return c;
+  // Если по привычке написали int n, забыв про unsigned
+  // if(n < 0) return 0; // или ОШИБКА !
+  unsigned int res = 1;
+  //for(int i = 1; i < (num+1); i++) // works too
+  for  (int i = 2; i <= n; i++)
+    res = res * i;
+  return res;
 }
-// tComplx: O(b) | Space O(1)
+
+// tComplx: O(n) | Space O(1)
 // (-) works slower then the recursive solution
 // (+-) 2 edges of a stick: + more code easier to debug, - more code then in a recursion and requires extra container and or space
 // (+) no stackoverflow problem, and Space complexity is O(1)
 ```
+
 ### 4.2 Факториал (Рекурсивный) A: IN 5 OUT 125 (1x2x3x4x5)
 ```
-int my_fact(int num)  // вычисление факториала числа num
+unsigned int my_fact(unsigned int n)
 {
-  if (num <= 1)
-	return 1;  // если число не больше 1, возвращаем 1
-	
-  return (num * fact(num - 1));  // рекурсивный вызов для числа на 1 меньше
+  if (n == 0 || n == 1)
+    return 1;
+  return (n * factorial(n - 1));
 }
-// tComplx: O(b) | Space O(b)
+
+// tComplx: O(n) | Space O(n)
 // (+) works faster, since we work with the stack memory
 // (+-) 2 edges of a stick: + less code / compact solution, - too compact, not perfect for debugging
 // (-) stackoverflow problem - since recurs leaves on a stack a return addres (to do the return call) to a function, on each step of the recursion level
@@ -4709,11 +4719,83 @@ template<> struct factorial<0> {
 const unsigned f5 = factorial<5>::value; // 120
 ```
 
-### 5.1 перевод строки в число =  (1) atio "своими руками"
-A: IN строка str="345" OUT в число типа int n=435
+### 4.4 Фактореал - Факториал для больших значений / больших чисел n > 19
+
+- https://www.geeksforgeeks.org/factorial-large-number/
 
 ```
-int myAtio(std::string a = "456")
+// C++ program to compute factorial of big numbers
+#include <iostream>
+using namespace std;
+ 
+#define MAX 500 // Maximum number of digits in output
+ 
+int multiply(int x, int res[], int res_size);
+ 
+// This function finds factorial of large numbers
+// and prints them
+void factorial(int n)
+{
+  int res[MAX];
+  
+  // Initialize result
+  res[0] = 1;
+  int res_size = 1;
+  
+  // Apply simple factorial formula n! = 1 * 2 * 3
+  // * 4...*n
+  for (int x = 2; x <= n; x++)
+      res_size = multiply(x, res, res_size);
+  
+  cout << "Factorial of given number is \n";
+  for (int i = res_size - 1; i >= 0; i--)
+      cout << res[i];
+}
+ 
+// This function multiplies x with the number
+// represented by res[].
+// res_size is size of res[] or number of digits in the
+// number represented by res[]. This function uses simple
+// school mathematics for multiplication.
+// This function returns the
+// new value of res_size
+int multiply(int x, int res[], int res_size)
+{
+  int carry = 0; // Initialize carry
+  
+  // One by one multiply n with individual digits of res[]
+  for (int i = 0; i < res_size; i++) {
+    int prod = res[i] * x + carry;
+  
+    // Store last digit of 'prod' in res[]
+    res[i] = prod % 10;
+  
+    // Put rest in carry
+    carry = prod / 10;
+  }
+  
+  // Put carry in res and increase result size
+  while (carry) {
+    res[res_size] = carry % 10;
+    carry = carry / 10;
+    res_size++;
+  }
+  return res_size;
+}
+ 
+int main()
+{
+  factorial(100);
+  return 0;
+}
+```
+
+
+### 5.1 перевод строки в число =  (1) atio "своими руками"
+A: IN строка str="345" OUT в число типа int n=345
+
+```
+int myAtio(std::string a = "345")
 {
   int c = 0;
   int len = a.size();
@@ -4721,36 +4803,36 @@ int myAtio(std::string a = "456")
   for(int i=0; i < len; i++)
   {
     c = c*10;
-	switch(a[i])
-	{
-	  case '0': c=c+0; break;
-	  case '1': c=c+1; break;
-	  case '2': c=c+2; break;
-	  case '3': c=c+3; break;
-	  case '4': c=c+4; break;
-	  case '5': c=c+5; break;
-	  case '6': c=c+6; break;
-	  case '7': c=c+7; break;
-	  case '8': c=c+8; break;
-	  case '9': c=c+9; break;
-	}
+    switch(a[i])
+    {
+      case '0': c=c+0; break;
+      case '1': c=c+1; break;
+      case '2': c=c+2; break;
+      case '3': c=c+3; break;
+      case '4': c=c+4; break;
+      case '5': c=c+5; break;
+      case '6': c=c+6; break;
+      case '7': c=c+7; break;
+      case '8': c=c+8; break;
+      case '9': c=c+9; break;
+    }
   }
   return c;
 }
 ```
 		       
 ### 5.2 перевод строки в число = atio "своими руками"
-A: IN строка str="345" OUT в число типа int n=435
+A: IN строка str="345" OUT в число типа int n=345
 
 ```
-int myAtio(std::string a = "456")
+int myAtio(std::string a = "345")
 {
   int c = 0;
   int len = a.size();
   for(int i=0; i < len; i++)
   {
     c = c * 10;
-	c = (a[i] - '0') + c;
+    c = (a[i] - '0') + c;
   }
   return c;
 }
@@ -4851,17 +4933,16 @@ int main()
 
 ### ПРОВЕРИТЬ
 ```
-int binary_find(int n, int *x, long A)
+int binary_find(int n, vector<int>& v, long x)
 {
- int m, left, right;
- left = 0; right = n-1;
+ int m =0, left = 0, right = n-1;
  while (true)
  {
-    if (left > right) return (-1); // значение не найдено
-    m = left + (right - left) / 2;
-    if (x[m] < A) left = m + 1;
-    if (x[m] > A) right = m - 1;
-    if (x[m] == A) return m;
+  if (left > right) return (-1); // значение не найдено
+  m = left + (right - left) / 2;
+  if (v[m] < x) left  = m + 1;
+  if (v[m] > x) right = m - 1;
+  if (v[m] == x) return m;
  }
 }
 ```
@@ -4869,38 +4950,38 @@ int binary_find(int n, int *x, long A)
 ### 9. Алгоритм Бинарного поиска / Бинарный/Двоичный поиск С++
 ### 9. Recursive implementation of Binary Search tCmplx: O(log n) ; Space: O(1)
 ```
-int binarySearch(int arr[], int l, int r, int x)
+//int binarySearch(int arr[], int L, int r, int x)
+
+int binarySearch(vector<int>& arr, int L, int r, int x)
 {
-  if (r >= l) {
-    int mid = l + (r - l) / 2;
-    // If the element is present at the middle itself
-    if (arr[mid] == x)
+  if (r >= L) {
+    int mid = L + ((r - L) / 2);
+    if (arr[mid] == x) // If x is present at the middle itself
       return mid;
-    // If element is smaller than mid, then
-    // it can only be present in left subarray
+    // X < than mid, => it can only be present in left subarray
     if (arr[mid] > x)
-      return binarySearch(arr, l, mid - 1, x);
-    // Else the element can only be present
-    // in right subarray
-    return binarySearch(arr, mid + 1, r, x);
+      return binarySearch(arr,       L, mid - 1, x);
+    return binarySearch(  arr, mid + 1,       r, x);
+    // Else the element can only be present in right subarray
   }
-  // We reach here when element is not present in array
-  return -1;
+  return -1; // We reach here when element is not present in array
 }
  
 int main(void)
 {
-    int arr[] = { 2, 3, 4, 10, 40 };
-    int x = 10;
-    int n = sizeof(arr) / sizeof(arr[0]);
-    int result = binarySearch(arr, 0, n - 1, x);
+  //int arr[] = { 2, 3, 4, 10, 40 };
+  //int n = sizeof(arr) / sizeof(arr[0]);
+  
+  vector<int> arr = { 2, 3, 4, 10, 40};
+  int x = 10;
+  int result = binarySearch(v, 0, arr.size() - 1, x);
 }
 ```
 
 ### 9. Алгоритм Бинарного поиска / Бинарный/Двоичный поиск С++
 ### 9. Iterative implementation to Binary Search tCmplx: O(log n) ; Space: O(1)
 ```
-int binarySearch(vector<int> v, int To_Find)
+int binarySearch(vector<int>& v, int To_Find)
 {
   int lo = 0, hi = v.size() - 1;
   int mid;
@@ -4908,14 +4989,14 @@ int binarySearch(vector<int> v, int To_Find)
   // for mid=lo-(hi-lo)/2
   
   while (hi - lo > 1) { // while(lo<=hi)
-      int mid = (hi + lo) / 2;
-  	
-      if (v[mid] < To_Find) {
-          lo = mid + 1;
-      }
-      else {
-          hi = mid;
-      }
+    int mid = (hi + lo) / 2;
+    
+    if (v[mid] < To_Find) {
+        lo = mid + 1;
+    }
+    else {
+        hi = mid;
+    }
   }
   
   if (v[lo] == To_Find) { cout << "Found" << " At Index " << lo << endl; }
