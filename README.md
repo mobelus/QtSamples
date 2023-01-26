@@ -2572,10 +2572,12 @@ https://habr.com/ru/post/443406/
 - РЕШЕНИЕ_1: std::scoped_lock lock{muA, muB};
 - РЕШЕНИЕ_2: std::timed_mutex, в котором можно указать таймаут, по истечении которого блокировка будет снята, если ресурс не стал доступен.
 - РЕШЕНИЕ_3: std::lock(lock1, lock2); // Передаём не мьютексы, а два юник-лока
-``` std::unique_lock<std::mutex> lock1(from.m, std::defer_lock);
+``` 
+std::unique_lock<std::mutex> lock1(from.m, std::defer_lock);
 std::unique_lock<std::mutex> lock2(to.m, std::defer_lock);
 // блокирует оба объекта unique_lock без взаимной блокировки
-std::lock(lock1, lock2); ```
+std::lock(lock1, lock2); 
+```
 9) Пытаться дважды захватить блокировку std::mutex
 - В разных местах std::lock_guard<std::mutex> lock(mu); на один и тот же мьютекс
 10) Использовать мьютексы, когда достаточно std::atomic типов
