@@ -2557,17 +2557,17 @@ https://habr.com/ru/post/443406/
 - ПРОБЛЕМА: ибо внутри ~thread() сработает terminate();
 2) thread t1; // [1] t1.detach(); [2] КОД [3] t1.join(); // CRASH !!!
 - НЕ ЗАБЫВАЕМ ПЕРЕД join() СДЕЛАТЬ joinable() => if (t1.joinable()) { t1.join(); }
-3) std::thread::join() блокирует вызывающий поток выполнения
+3) thread::join() блокирует вызывающий поток выполнения
 4) Не забываем std::ref(), если хотим передать в поток значение ПО ССЫЛКЕ.
 - Просто передача в функцию параметра, даже если функция func(&x) принимает что-то по ссылке по факту std::thread без std::ref() передаст в неё только значение и всё
 5) Разделяемые данные и ресурсы ЗАЩИЩАЕМ с помощью критической секции (например мьютексом), когда МНОГО потоков конкурируют за ресурсы и общие данные.
-6.1) Можно забыть mutex.unlock, поэтому используем классы RAII-обёртки, lock_guard(), unique_lock(), scoped_lock(), std::lock(m1, m2, ..., mN);
-6.2) Можно вызвать на мьютексе лишний lock(),
+- 6.1) Можно забыть mutex.unlock, поэтому используем классы RAII-обёртки, lock_guard(), unique_lock(), scoped_lock(), std::lock(m1, m2, ..., mN);
+- 6.2) Можно вызвать на мьютексе лишний lock(),
 - ПРОБЛЕМА: ДВОЙНОЙ лок mutex.lock(); mutex.lock(); - UNDEF_BEHAVIOUR. На разных платформах может ЗАВИСНУТЬ (Linux), а может и CRASH (Win, но врятли) быть
 - РЕШЕНИЕ: try_lock() а так же std::adopt_lock, чтобы показать объектам std::lock_guard, что мьютексы уже заблокированы
-7.1) Делать размер критической секции больше, чем это необходимо.
+- 7.1) Делать размер критической секции больше, чем это необходимо.
 - 1 поток захватил мьютекс на минуту, 10 других потоков, что пытаются в нее войти, по сути заблокированы
-7.2) Держим в критической секции ТОЛЬКО те методы, что МОДИФИЦИРУЮТ данные
+- 7.2) Держим в критической секции ТОЛЬКО те методы, что МОДИФИЦИРУЮТ данные
 8) ДЕДЛОК - Взятие нескольких блокировок в разном порядке
 - РЕШЕНИЕ_1: std::scoped_lock lock{muA, muB};
 - РЕШЕНИЕ_2: std::timed_mutex, в котором можно указать таймаут, по истечении которого блокировка будет снята, если ресурс не стал доступен.
@@ -2601,13 +2601,14 @@ std::lock(lock1, lock2);
 - РЕШЕНИЕ: Для избежания всех этих сложностей всегда вызывайте std::async с политикой запуска std::launch::async.
 - КОРОЧЕ: //выполнение функции myFunction используя std::async с политикой запуска по умолчанию НЕ ДЕЛАЙТЕ ТАК
 auto myFuture = std::async(myFunction);
-- (!!!) Вместо этого делайте так: //выполнение функции myFunction асинхронно
-auto myFuture = std::async(std::launch::async, myFunction);
+- (!!!) Вместо этого делайте так: 
+- //выполнение функции myFunction асинхронно
+- auto myFuture = std::async(std::launch::async, myFunction);
 15) Вызывать метод get() у std::future объекта в блоке кода, время выполнение которого критично
 16) Непонимание того, что исключения, выброшенные внутри асинхронной операции, передадутся в вызывающий поток только при вызове std::future::get()
 - РЕШЕНИЕ std::packaged_task и переместить его в нужный поток выполнения после установки свойств потока.
 17) Создавать намного больше «выполняющихся» потоков, чем доступно ядер
-ПРОБЛЕМА - количество выполняющихся потоков поддерживает система? Используйте метод std::thread::hardware_concurrency().
+- ПРОБЛЕМА - количество выполняющихся потоков поддерживает система? Используйте метод thread::hardware_concurrency().
 18) Использование ключевого слова volatile для синхронизации
 - ПРОБЛЕМА: Ключевое слово volatile перед указанием типа переменной не делает операции с этой переменной атомарными или потокобезопасными.
 - РЕШЕНИЕ: То, что вы, вероятно, хотите, это std::atomic.
@@ -2617,6 +2618,16 @@ auto myFuture = std::async(std::launch::async, myFunction);
 - Если вам нужна синхронизация, профилировали ли вы свой код для понимания характеристик производительности? Если да, пытались ли вы оптимизировать узкие места?
 - Можете ли вы горизонтально масштабироваться вместо того чтобы масштабироваться вертикально?
 
+### Дополнительно о std::lock(...Args)
+ДОКУМЕНТАЦИЯ:
+- Locks the given Lockable objects lock1, lock2, ..., lockn using a deadlock avoidance algorithm to avoid deadlock.
+- The objects are locked by an **unspecified series of calls to lock, try_lock, and unlock**. If a call to lock or unlock results in an exception, unlock is called for any locked objects before rethrowing.
+
+### Дополнительно о mutex.lock + mutex.lock
+ДОКУМЕНТАЦИЯ:
+- Locks the mutex. If another thread has already locked the mutex, a call to lock will block execution until the lock is acquired.
+- If lock is called by a thread that already owns the mutex, (** mutex.lock + mutex.lock **) this is an **UNDEFINED BEHAVIOR**: for example, the program may deadlock. An implementation that can detect the invalid usage is encouraged to throw a std::system_error with error condition resource_deadlock_would_occur instead of deadlocking.
+	
 # МНОГОПОТОЧНОСТЬ
 
 ### std::thread			  
