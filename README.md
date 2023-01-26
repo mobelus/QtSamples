@@ -2571,7 +2571,7 @@ https://habr.com/ru/post/443406/
 8) ДЕДЛОК - Взятие нескольких блокировок в разном порядке
 - РЕШЕНИЕ_1: std::scoped_lock lock{muA, muB};
 - РЕШЕНИЕ_2: std::timed_mutex, в котором можно указать таймаут, по истечении которого блокировка будет снята, если ресурс не стал доступен.
-- РЕШЕНИЕ_3: std::lock(lock1, lock2); // Передаём не мьютексы, а два юник-лока
+- РЕШЕНИЕ_3: std::lock(lock1, lock2); // Передаём НЕ мьютексы, а два юник-лока
 ``` 
 std::unique_lock<std::mutex> lock1(from.m, std::defer_lock);
 std::unique_lock<std::mutex> lock2(to.m, std::defer_lock);
@@ -2618,15 +2618,20 @@ auto myFuture = std::async(myFunction);
 - Если вам нужна синхронизация, профилировали ли вы свой код для понимания характеристик производительности? Если да, пытались ли вы оптимизировать узкие места?
 - Можете ли вы горизонтально масштабироваться вместо того чтобы масштабироваться вертикально?
 
-### Дополнительно о std::lock(...Args)
-ДОКУМЕНТАЦИЯ:
-- Locks the given Lockable objects lock1, lock2, ..., lockn using a deadlock avoidance algorithm to avoid deadlock.
-- The objects are locked by an **unspecified series of calls to lock, try_lock, and unlock**. If a call to lock or unlock results in an exception, unlock is called for any locked objects before rethrowing.
-
 ### Дополнительно о mutex.lock + mutex.lock
 ДОКУМЕНТАЦИЯ:
 - Locks the mutex. If another thread has already locked the mutex, a call to lock will block execution until the lock is acquired.
 - If lock is called by a thread that already owns the mutex, (** mutex.lock + mutex.lock **) this is an **UNDEFINED BEHAVIOR**: for example, the program may deadlock. An implementation that can detect the invalid usage is encouraged to throw a std::system_error with error condition resource_deadlock_would_occur instead of deadlocking.
+
+### Дополнительно о std::lock(...Args) - ЕСТЬ В С++11
+ДОКУМЕНТАЦИЯ:
+- Locks the given Lockable objects lock1, lock2, ..., lockn using a deadlock avoidance algorithm to avoid deadlock.
+- The objects are locked by an **unspecified series of calls to lock, try_lock, and unlock**. If a call to lock or unlock results in an exception, unlock is called for any locked objects before rethrowing.
+- (!) std::lock() это ОЛДСКУЛ (НО зато он есть в С++11), лучше ЮЗАТЬ **std::scoped_lock** (Но он только с С++17) offers a RAII wrapper for this function, and is generally **preferred to a naked call to std::lock**. 
+
+### Дополнительно о std::scoped_lock(...Args) - НЕТ В С++11, только в С++17
+ДОКУМЕНТАЦИЯ:
+- Едиснвтенный минус ЕГО НЕТ В С++11, ОН ЕСТЬ только в С++17, Альтернатива в с++11 это std::lock(...Args)
 	
 # МНОГОПОТОЧНОСТЬ
 
