@@ -2634,9 +2634,9 @@ if(!p) // UB access to uninitialized scalar
 4) Выход за пределы массива через operator[], v={1,2,3}; v[4]; / v[-1]; => UB
 5) Переполнение (overflow) знакового int (signed integer type) Всегда UNDEFINED BEHAVIOR (UB):
 - int x = INT_MAX; x++; // Boom! (usually silent)
-6) Разуменование нулевого указателя. 
+6) Разыменование нулевого указателя. 
 - int *p = 0; *p = 123; // Kaboom
-7) Shifting more than the integer width or less than zero is UB:
+7) Побитовый сдвиг за пределы числа бит в типе влева или впарво (Shifting more than the integer width or less than zero is UB):
 ```
 uint32_t x = 0;
 x = x << 33;  // Blamo
@@ -2654,7 +2654,7 @@ int main()
 10) 3 потока, 1,2,3 -> 3-взял мьютекс, 2_и_1 стали ждать, Номер 3 освободил мьютекс. 
 - Захватить следующим мьютекс может как 1 так и 2 или как 2 так и 1 порядок не определён.
 11) Два раза захваченный мьютекс:
-- (** mutex.lock() + mutex.lock() **)
+- **mutex m; m.lock(); m.lock();**
 
 
 
