@@ -3,8 +3,16 @@ Many small samples of qt projects
 
 TODO - https://www.youtube.com/watch?time_continue=347&v=iR8K6ya0ZaY&feature=emb_logo
 
-
 http://qt.shoutwiki.com/wiki/Closing_a_Qt_Quick_application_from_QML
+
+https://habr.com/ru/post/117996/
+https://proglib.io/p/tricky-challenges-cpp
+https://techrocks.ru/2019/03/01/popular-interview-questions-on-c-plus-plus/
+https://pvs-studio.com/ru/blog/posts/cpp/0722/
+https://medium.com/@rodrigues.b.nelson/choosing-wisely-c-containers-and-big-oh-complexity-64f9bd1e7e4c
+https://flexiple.com/algorithms/big-o-notation-cheat-sheet/
+
+https://www.cyberforum.ru/cpp-beginners/thread971708.html
 
 
 ### QtSamples
@@ -1608,6 +1616,28 @@ std::unordered_map<Key,std::string,KeyHasher> m6 = {
 	
 - просеивание кучи
 
+https://flexiple.com/algorithms/big-o-notation-cheat-sheet/
+	
+- Search Algorithms
+
+| Search Algorithms	| Space Complexity	| Time Complexity | -            | -           |
+|-----------------------|-----------------------|-----------------|--------------|-------------|
+|  -                    |    -                  | Best Case	  | Average Case | Worst Case  |
+| Linear Search	        | O(1)	                | O(1)	          | O(n)	 | O(n)        |
+| Binary Search	        | O(1)	                | O(1)	          | O(log n)	 | O(log n)    |
+
+- Sorting Algorithms
+
+| Sorting Algorithms	| Space Complexity	| Time Complexity | -            | -          |
+|-----------------------|-----------------------|-----------------|--------------|------------|
+|                       |                       | Best Case	  | Average Case | Worst Case |
+| Selection Sort	| O(1)	                | O(n^2)	  | O(n^2)	 | O(n^2)     |
+| Insertion Sort	| O(1)	                | O(n)	          | O(n^2)	 | O(n^2)     |
+| Bubble Sort	        | O(1)	                | O(n)	          | O(n^2)	 | O(n^2)     |
+| Quick Sort	        | O(log n)              | O(log n)        | O(n log n)   | O(n log n) |
+| Merge Sort	        | O(n)	                | O(n)	          | O(n log n)   | O(n log n) |
+| Heap Sort	        | O(1)	                | O(1)	          | O(n log n)   | O(n log n) |
+	
 
 
 
