@@ -1529,7 +1529,7 @@ std::unordered_map<Key,std::string,KeyHasher> m6 = {
 
 # Алгоритмы НЕ могут использоваться со СПИСКАМИ, потому что списки не поддерживают итераторы ПРОИЗВ. доступа.
 
-![alt text]([http://url/to/img.png](https://slideplayer.com/slide/12808783/78/images/2/C%2B%2B+Data+Structure+Runtimes.jpg))
+![]([C+++Data+Structure+Runtimes.jpg])
 
 |---------------------------|----------------------------|
 |vector - вставка в Конец:  | O(1) АМОРТИЗИРОВАННОЕ O(n) |
