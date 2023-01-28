@@ -1378,7 +1378,7 @@ std::unordered_map<Key,std::string,KeyHasher> m6 = {
 
 - list - НЕ Инвалидирует ИТЕРАТОРЫ - указатели переуказывают на другие элементы просто и всё хорошо с итераторами
 - дерево - НЕ Инвалидирует ИТЕРАТОРЫ - указатели переуказывают на другие элементы просто и всё хорошо с итераторами ибо это структура с указателями на left и на right и поэтому всё ровно. Самобалансирующиеся деревья AVL () / Красно-чёрное / Декартовы рандомизированные деревья, у всех разные условия балансировки, в зависимости от версии компилятора.
-- хэш-таблица - ИНВАЛИДирует ИТЕРАТОРЫ - использует под собой динамический массив. И когда есть коллизии образуются связные списки, дойдя до каких-то пределов хэш-таблица выполнит операцию rehash(), и это инвалидирует итераторы (1. Метод цепочек - перехеширование происходит при наличии (4n/3) элементов 2. Открытая Адресация - перехеширование надо проводить при неполном заполнении хеш-таблицы.)
+- хэш-таблица - ИНВАЛИДирует ИТЕРАТОРЫ - использует под собой динамический массив. И когда есть коллизии образуются связные списки, дойдя до каких-то пределов хэш-таблица выполнит операцию rehash() переиндексация всей хеш-таблицы, и это инвалидирует итераторы (1. Метод цепочек - перехеширование происходит при наличии (4n/3) элементов 2. Открытая Адресация - перехеширование надо проводить при неполном заполнении хеш-таблицы.)
 - vector - ИНВАЛИДирует ИТЕРАТОРЫ - В векторе происходит реаллокация памяти, как только size уходит за capacity
 - std::priority_queue<int> pq; - ИНВАЛИДирует ИТЕРАТОРЫ - // основан на куче HEAP - вставка и удаление O(log(n)) ибо приходится выполнять операцию hepiphy, т.е. просеивать кучу из-за чего итераторы в результате становятся невалидными после просеивания
 - std::stack и std::queue - основаны на std::deque
@@ -1529,54 +1529,83 @@ std::unordered_map<Key,std::string,KeyHasher> m6 = {
 
 # Алгоритмы НЕ могут использоваться со СПИСКАМИ, потому что списки не поддерживают итераторы ПРОИЗВ. доступа.
 
-![](C+++Data+Structure+Runtimes.jpg)
+![](Screenshot_1368.png)
 	
-| Операция                   | Значение                   |
-|----------------------------|----------------------------|
-| vector - вставка в Конец:  | O(1) АМОРТИЗИРОВАННОЕ O(n) |
-| vector - вставка в Произв: | O(n)                       |
-| vector - удален. Конец:    | O(1) АМОРТИЗИРОВАННОЕ      |
-| vector - удален. Произв:   | O(n)                       |
-| vector - произв. Доступ:   | O(1)                       |
-| vector - поиск по сорт.:   | O(log(n)) Бинарн.поиск     |
-| vector - поиск несорт. :   | O(n)                       |
-| vector - валидность итер.: | нет                        |
-
-```
-deque - вставка в Конец:   O(1)
-deque - вставка в Произв: O(n)
-deque - удален. Конец:      O(1)
-deque - удален. Произв:    O(n)
-deque - произв. Доступ:     O(1)
-deque - поиск по сорт.:      O(log n)
-deque - поиск несорт. :      O(n)
-deque - валидность итер.: Указатели только
-
-list - вставка:             O(1)
-list - удален.:             O(1)
-list - произв. Доступ: O(1)
-list - поиск:                 O(n)
-list - валидность итер.: ДА
-
-set / map - вставка  O(log n)
-set / map - удален   O(log n)
-set / map - произв. Доступ НЕТ (хэш таблица)
-set / map - поиск    O(log n)
-set / map - валидность итер.: ДА
-
-unordered_set - вставка  O(1) или O(n)
-unordered_set - удален   O(1) или O(n)
-unordered_set - произв. Доступ O(1) или O(n)
-unordered_set - поиск    O(1) или O(n)
-unordered_set - валидность итер.: Указатели только
-
-priority_queue - вставка             O(log n)
-priority_queue - удален              O(log n)
-priority_queue - произв. Доступ O(1)
-priority_queue - поиск                 НЕТ (O(n))
-priority_queue - валидность итер.: хз
-```
+| Операция                     | Значение                   |
+|------------------------------|----------------------------|
+| vector +  вставка в Конец:   | O(1) АМОРТИЗИРОВАННОЕ O(n) |
+| vector +  вставка в НЕ_Конец | O(n)                       |
+| vector -  удален. Конец:     | O(1)                       |
+| vector -  удален. Произв:    | O(n)                       |
+| vector [] произв. Доступ:    | O(1)                       |
+| vector s  поиск НЕсортриров: | O(n)                       |
+| vector ss поиск по SORTиров: | O(log(n)) Бинарным поиском |
+| vector it валидность итер.:  | нет                        |
 	
+- АМОРТИЗИРОВАННОЕ ибо, когда size > capacity, то при вставке происходит расширение capacity в 2 раза и происходит полное перекопирование старого вектора в новое место
+
+- Двусторонняя очередь - список из фиксированных векторов
+| Операция                            | Значение                   |
+|-------------------------------------|----------------------------|
+| deque +  вставка в Конец:           | O(1)                       |
+| deque +  вставка в Начало:          | O(1)                       |
+| deque +  вставка НЕ_Конец_Не_Начало | O(n)                       |
+| deque -  удален. Конец:             | O(1)                       |
+| deque -  удален. Начало:            | O(1)                       |
+| deque -  удален. НЕ_Конец_Не_Начало | O(n)                       |
+| deque [] произв. Доступ:            | O(1)                       |
+| deque s  поиск НЕсортриров:         | O(n)                       |
+| deque ss поиск по сортиров:         | O(log(n)) Бинарным поиском |
+| deque it валидность итер.:          | Указатели только           |
+
+- list / forward_list / stack / queue
+	
+| list and forward_list                    | Значение          |
+|------------------------------------------|-------------------|
+| list +/-  вставка/удаление в Конец:      | O(1)              |
+| list +/-  вставка/удаление в Начало:     | O(1)              |
+| list +/-  вставка/удаление по Итератору: | O(1)              |
+| list +/-  вставка/удаление по Индексу:   | O(n)              |
+| list - произв. Доступ:                   | O(n) (*)          |
+| list - поиск:                            | O(n)              |
+| list - валидность итер.:                 | ДА                |
+	
+(*) O(n) - ибо идём по всем элементам через их указатели по всему листу пока не дойдём до указанного индекса
+	
+- Красно-чёрное дерево
+	
+| Операция                          | Значение                   |
+|-----------------------------------|----------------------------|
+| set / map - вставка               | O(log n)                   |
+| set / map - удален                | O(log n)                   |
+| set / map - произв. Доступ        | НЕТ                        |
+| set / map - поиск                 | O(log n)                   |
+| set / map - валидность итер.:     | ДА                         |
+
+- хеш-таблица
+	
+| Операция                          | Значение                   |
+|-----------------------------------|----------------------------|
+| unordered_set - вставка           | O(1) АМОРТИЗИРОВАННОЕ O(n) |
+| unordered_set - удален            | O(1) АМОРТИЗИРОВАННОЕ O(n) |
+| unordered_set - произв. Доступ    | O(1) АМОРТИЗИРОВАННОЕ O(n) |
+| unordered_set - поиск             | O(1) АМОРТИЗИРОВАННОЕ O(n) |
+| unordered_set - валидность итер.: | Указатели только           |
+	
+- АМОРТИЗИРОВАННОЕ, ибо ПЕРВОЕ(1): на месте КОЛЛИЗИЙ начинают формироваться Бакеты, а бакет в стандартной библиотеке представляет из себя как правило обычный список, а операции в списке в худшем случае О(n)
+- АМОРТИЗИРОВАННОЕ, ибо ВТОРОЕ(2): при разростании таблицы, на каком-то этапе вставки нового элемента может случиться REHASH - переиндексация всей хеш-таблицы. Суть: Пока таблица мала, использовалась одна хэш функция, при переполнении таблицы. Для избежания переполнения выбирается новая хеш-функции и (или) хеш-таблица большего размера, и этот процесс называется перехеширование (rehashing).
+
+- heap = priority_queue
+	
+| Операция                          | Значение                   |
+|-----------------------------------|----------------------------|
+| priority_queue - вставка          | O(log n)                   |
+| priority_queue - удален           | O(log n)                   |
+| priority_queue - произв. Доступ   | O(1)                       |
+| priority_queue - поиск            | НЕТ - (O(n))               |
+| priority_queue - валидность итер. | НЕТ - хз                   |
+	
+- просеивание кучи
 
 
 
@@ -5803,37 +5832,37 @@ public:
 ```
 class S
 {
-    public:
-        static S& getInstance()
-        {
-            static S    instance; // Guaranteed to be destroyed.
-                                  // Instantiated on first use.
-            return instance;
-        }
-    private:
-        S() {}                    // Constructor? (the {} brackets) are needed here.
+  public:
+    static S& getInstance()
+    {
+      static S    instance; // Guaranteed to be destroyed.
+                            // Instantiated on first use.
+      return instance;
+    }
+  private:
+    S() {}                    // Constructor? (the {} brackets) are needed here.
 
-        // C++ 03
-        // ========
-        // Don't forget to declare these two. You want to make sure they
-        // are inaccessible(especially from outside), otherwise, you may accidentally get copies of
-        // your singleton appearing.
-        S(S const&);              // Don't Implement
-        void operator=(S const&); // Don't implement
+    // C++ 03
+    // ========
+    // Don't forget to declare these two. You want to make sure they
+    // are inaccessible(especially from outside), otherwise, you may accidentally get copies of
+    // your singleton appearing.
+    S(S const&);              // Don't Implement
+    void operator=(S const&); // Don't implement
 
-        // C++ 11
-        // =======
-        // We can use the better technique of deleting the methods
-        // we don't want.
-    public:
-        S(S const&)               = delete;
-        void operator=(S const&)  = delete;
+    // C++ 11
+    // =======
+    // We can use the better technique of deleting the methods
+    // we don't want.
+  public:
+    S(S const&)               = delete;
+    void operator=(S const&)  = delete;
 
-        // Note: Scott Meyers mentions in his Effective Modern
-        //       C++ book, that deleted functions should generally
-        //       be public as it results in better error messages
-        //       due to the compilers behavior to check accessibility
-        //       before deleted status
+    // Note: Scott Meyers mentions in his Effective Modern
+    //       C++ book, that deleted functions should generally
+    //       be public as it results in better error messages
+    //       due to the compilers behavior to check accessibility
+    //       before deleted status
 };	
 ```
 	
@@ -5842,18 +5871,18 @@ class S
 // Singleton.h
 class Singleton
 {
-  private:
-    static Singleton * p_instance;
-    // Конструкторы и оператор присваивания недоступны клиентам
-    Singleton() { }
-    Singleton( const Singleton& );  
-    Singleton& operator=( Singleton& );
-  public:
-    static Singleton * getInstance() {
-        if(!p_instance)           
-            p_instance = new Singleton();
-        return p_instance;
-    }
+private:
+  static Singleton * p_instance;
+  // Конструкторы и оператор присваивания недоступны клиентам
+  Singleton() { }
+  Singleton( const Singleton& );  
+  Singleton& operator=( Singleton& );
+public:
+  static Singleton * getInstance() {
+    if(!p_instance)           
+      p_instance = new Singleton();
+    return p_instance;
+  }
 };
 ```
 
@@ -5883,26 +5912,26 @@ public:
 #include <mutex>
 
 class Singleton {
- public:
-  static Singleton* GetInstance() 
-  {
-    Singleton* p = s_instance.load(std::memory_order_acquire);
-    if (p == nullptr) { // 1st check
-      std::lock_guard<std::mutex> lock(s_mutex);
-      p = s_instance.load(std::memory_order_relaxed);
-      if (p == nullptr) { // 2nd (double) check
-        p = new Singleton();
-        s_instance.store(p, std::memory_order_release);
-      }
-    }
-    return p;
-  }	
+public:
+ static Singleton* GetInstance() 
+ {
+   Singleton* p = s_instance.load(std::memory_order_acquire);
+   if (p == nullptr) { // 1st check
+     std::lock_guard<std::mutex> lock(s_mutex);
+     p = s_instance.load(std::memory_order_relaxed);
+     if (p == nullptr) { // 2nd (double) check
+       p = new Singleton();
+       s_instance.store(p, std::memory_order_release);
+     }
+   }
+   return p;
+ }	
 
- private:
-  Singleton() = default;
+private:
+ Singleton() = default;
 
-  static std::atomic<Singleton*> s_instance;
-  static std::mutex s_mutex;
+ static std::atomic<Singleton*> s_instance;
+ static std::mutex s_mutex;
 };
 
 ```	
