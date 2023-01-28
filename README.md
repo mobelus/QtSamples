@@ -1618,26 +1618,25 @@ std::unordered_map<Key,std::string,KeyHasher> m6 = {
 
 https://flexiple.com/algorithms/big-o-notation-cheat-sheet/
 	
-- Search Algorithms
+- Search Algorithms Алгоритмы поиска
 
-| Search Algorithms	| Space Complexity	| Time Complexity | -            | -           |
-|-----------------------|-----------------------|-----------------|--------------|-------------|
-|  -                    |    -                  | Best Case	  | Average Case | Worst Case  |
-| Linear Search	        | O(1)	                | O(1)	          | O(n)	 | O(n)        |
-| Binary Search	        | O(1)	                | O(1)	          | O(log n)	 | O(log n)    |
+| Search Algorithms	       | Space Complexity	| Time Complexity | -            | -           |
+|------------------------------|------------------------|-----------------|--------------|-------------|
+|  -                           |     -                  | Best Case	  | Average Case | Worst Case  |
+| Linear Search	Линейный поиск | O(1)	                | O(1)	          | O(n)	 | O(n)        |
+| Binary Search	Бинарный поиск | O(1)	                | O(1)	          | O(log n)	 | O(log n)    |
 
-- Sorting Algorithms
+- Sorting Algorithms Алгоритмы сортировки
 
-| Sorting Algorithms	| Space Complexity	| Time Complexity | -            | -          |
-|-----------------------|-----------------------|-----------------|--------------|------------|
-|                       |                       | Best Case	  | Average Case | Worst Case |
-| Selection Sort	| O(1)	                | O(n^2)	  | O(n^2)	 | O(n^2)     |
-| Insertion Sort	| O(1)	                | O(n)	          | O(n^2)	 | O(n^2)     |
-| Bubble Sort	        | O(1)	                | O(n)	          | O(n^2)	 | O(n^2)     |
-| Quick Sort	        | O(log n)              | O(log n)        | O(n log n)   | O(n log n) |
-| Merge Sort	        | O(n)	                | O(n)	          | O(n log n)   | O(n log n) |
-| Heap Sort	        | O(1)	                | O(1)	          | O(n log n)   | O(n log n) |
-	
+| Sorting Algorithms	    | Space Complexity	  | Time Complexity | -            | -          |
+|---------------------------|---------------------|-----------------|--------------|------------|
+|                           |                     | Best Case	    | Average Case | Worst Case |
+| Selection Sort Выбором    | O(1)	          | O(n^2)          | O(n^2)       | O(n^2)     |
+| Insertion Sort Вставками  | O(1)	          | O(n)            | O(n^2)       | O(n^2)     |
+| Bubble Sort Пузырьковая   | O(1)	          | O(n)            | O(n^2)       | O(n^2)     |
+| Quick Sort Быстрая сорт   | O(log n)            | O(log n)        | O(n log n)   | O(n log n) |
+| Merge Sort сорт слиянием  | O(n)	          | O(n)            | O(n log n)   | O(n log n) |
+| Heap Sort Пирамидальная   | O(1)	          | O(1)            | O(n log n)   | O(n log n) |
 
 
 
