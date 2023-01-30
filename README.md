@@ -4149,7 +4149,7 @@ dynamic_cast<derv_class *>(base_class_ptr_expr)
 ===================================================================
 
 	
-# WINDOWS
+# WINDOWS OS / OS WINDOWS / WINDOWS QUESTIONS
 
 	
 ### Типы ОБЪЕКТ ЯДРА
@@ -4617,7 +4617,7 @@ if ( _CrtMemDifference( &s3, &s1, &s2) )
 
 ===================================================================
 	
-# LINUX OS / LINUX QUESTIONS
+# LINUX OS / OS LINUX / LINUX QUESTIONS
 	
 ### Команды Linux
 https://www.hostinger.ru/rukovodstva/osnovnyje-komandy-linux#2-cd
