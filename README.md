@@ -989,9 +989,26 @@ https://tproger.ru/articles/move-semantics-and-rvalue/
 - Подробнее тут http://cpp-reference.ru/articles/virtual-constructor/
 
 ===================================================================
+
+### unique_ptr и shared_ptr Коротко
+- shared_ptr — для совместного владения, когда на объект может указывать много shared_ptr (можно создавать копии) и объект убивают, только когда все ссылки помрут.
+- unique_ptr — уникален, т.е. нескольких unique_ptr, указывающих на один и тот же объект, быть не может (копирование запрещено). Но при этом разрешена передача владения от одного unique_ptr другому, с одновременным уничтожением первого.
+
+### unique_ptr ПОДРОБНО
+- НЕТ счётчика ссылок, как в shared_ptr
+- Защищён от копирования (помещением в private конструктора копии и оператора присваниявания)
+- Нельзя копировать, можно только перемещать при помощи move-семантики
+- имеет метод reset() (c++23) - вызывающий деструктор для старого объекта
+
+```
+std::unique_ptr<Foo, D> up(new Foo(), D());  // up owns the Foo pointer (deleter D)
+std::cout << "Replace owned Foo with a new Foo...\n";
+up.reset(new Foo());  // calls deleter for the old one
+```
+
 https://habr.com/ru/post/191018/
 
-### shared_ptr 
+### shared_ptr ПОДРОБНО
 
 https://habr.com/ru/post/191018/
 
