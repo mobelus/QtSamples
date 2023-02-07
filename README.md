@@ -1,3 +1,22 @@
+# QT
+
+### Типы соединений, которые можно использовать между сигналами и слотами? Ответ -    
+Qobject::connect() имеет 5-ый параметр, как раз тот самый тип соединения. По умолчанию выставлен  AutoConnection
+
+- AutoConnection
+- DirectConnection
+- QueuedConnection
+- BlockingQueuedConnection
+- UniqueConnection
+
+### Аналог (наиболее близкий) контейнера std::list в Qt ?
+
+Ответ: QLinkedList
+
+### Аналог (наиболее близкий) контейнера QList в STL ?
+
+Ответ: std::deque
+
 
 # РАЗНОЕ	
 
