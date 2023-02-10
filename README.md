@@ -7039,6 +7039,6 @@ std::ostream &operator<<(std::ostream &ostream, const MyString::String &string) 
 - new int(1)
 - new int[10]
 Мы можем явно специализировать через шаблоны и constexpr
-	
 
-	
+
+# КОНЕЦ
