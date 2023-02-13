@@ -1922,15 +1922,46 @@ auto res = remove_if(people.begin(), people.end(), [](const Person &p)
 { return p.Score < 150; });
 people.erase(res, people.end());	
 ```	
-	
+
+
+
+### Как можно удалить последний элемент из вектора
+- 1. POP_BACK 
+ vec.pop_back();
+- 2. RESIZE
+ vec.resize(vec.size() - 1);
+
+3. VEC.ERASE - она возвращает итератор и указывает на элемент, находящийся ПОСЛЕ удалённого элемента (справа от удалённого)
+
+ iterator erase (iterator position);
+
+ iterator erase (iterator starting_position, iterator ending_position);
+
+### VEC.ERASE() - Он переводит итератор в позицию, где элемент нужно удалить. Чтобы удалить элемент в конце вектора, передайте итератор, указывающий на последний элемент в векторе.
+vec.erase(vec.end() - 1);
+
+Remove 1-st element from the vector
+vec.erase(vec.begin());
+
+### STD::REMOVE
+std::remove НИЧЕГО НЕ УДАЛЯЕТ, а только СМЕЩАЕТ то что нужно оставить влево и ВОЗВРАЩАЕТ УКАЗАТЕЛЬ на конец+1 элемент того, что она оставила
+
+	auto noSpaceEnd = std::remove(str1.begin(), str1.end(), ' ');
+ 
+
 ### Идиома erase-remove Идиома / erase remove идиома нужна для Вектора, а для Списка НЕТ
-``` v[7]={1,2,3,2,8,2,7}; ```		       
-- auto it = std::remove(v.begin(), v.end(), 2);
-- 1. Выполнит смещение всех элементов != 2 влево, в нашем случае 4 элемента будут на первых 4-ёх позициях т.е. v[7]={1,3,8,7,8,2,7}; 
-- 2. Длинна вектора при этом не изменится, и remove вернёт итератор it на следующий после 4-го элемента, т.е. it-> index=[5] -> element_value = {8}
+
+```
+vec[7]={1,2,3,2,8,2,7}; 		       
+vec.erase( std::remove( vec.begin(), vec.end(), 2), vec.end() );
+```
+
+- **REMOVE** FISRT: auto it = std::remove(vec.begin(), vec.end(), 2);
+- 1. Выполнит смещение всех элементов != 2 влево, в нашем случае 4 элемента будут на первых 4-ёх позициях т.е. vec[7]={1,3,8,7,8,2,7}; 
+- 2. Длинна вектора при этом не изменится, и REMOVE вернёт итератор it на следующий после 4-го элемента, т.е. it-> index=[5] -> element_value = {8}
 - 3. Все элементы после 4-го будут в несогласованном состоянии, скорее всего просто останется то, что было в оригинальном векторе, без изменений. Хотя говорят обычно, что все "не нужные" элементы уберутся в конец вектора, но это происходит не всегда, и конец может и не тронутся вовсе.
-- v = erase(it, v.end());
-- Просто отрезаем от вектора, начиная с того, на что указывает it, и заканчивая концом вектора, и получаем  v[4]={1,3,8,7}
+- **ERASE** SECOND: vec = erase(it, vec.end());
+- Просто отрезаем ERASE от вектора, начиная с того, на что указывает it, и заканчивая концом вектора, и получаем  v[4]={1,3,8,7}
 
 	
 ### Удалить все цифры 8 внутри числового вектора:
@@ -2905,7 +2936,7 @@ std::lock(lock1, lock2);
 ### Дополнительно о mutex.lock + mutex.lock
 ДОКУМЕНТАЦИЯ:
 - Locks the mutex. If another thread has already locked the mutex, a call to lock will block execution until the lock is acquired.
-- If lock is called by a thread that already owns the mutex, (** mutex.lock + mutex.lock **) this is an **UNDEFINED BEHAVIOR**: for example, the program may deadlock. An implementation that can detect the invalid usage is encouraged to throw a std::system_error with error condition resource_deadlock_would_occur instead of deadlocking.
+- **(*)** If lock is called by a thread that already owns the mutex, (** mutex.lock + mutex.lock **) this is an **UNDEFINED BEHAVIOR**: for example, the program may deadlock. An implementation that can detect the invalid usage is encouraged to throw a std::system_error with error condition resource_deadlock_would_occur instead of deadlocking.
 
 ### Дополнительно о std::lock(...Args) - ЕСТЬ В С++11
 ДОКУМЕНТАЦИЯ:
@@ -2915,6 +2946,7 @@ std::lock(lock1, lock2);
 
 ### Дополнительно о std::scoped_lock(...Args) - НЕТ В С++11, только в С++17
 ДОКУМЕНТАЦИЯ:
+- **(*)** Будет сделана в неопределённом порядке **серия вызовов lock-ОВ, try_lock-ОВ, и unlock-ОВ**. Когда результат lock-а или unlock-а свалятся в exception, вызовется дополнительный unlock, чтобы предотваратить дедлок и залочить / разлочить объекты в правильном порядке 
 - Едиснвтенный минус ЕГО НЕТ В С++11, ОН ЕСТЬ только в С++17, Альтернатива в с++11 это std::lock(...Args)
 
 ### Как защититься от double exception ?
@@ -3503,7 +3535,44 @@ http://www.cyberforum.ru/cpp-beginners/thread921902.html
 - Атомарные операции 
 
 	defer_lock_t  -  try_to_lock_t  -  adopt_lock_t 
-	
+
+### double simple mutex.lock()
+Двойной Лок на обычном мьютексе в одном и том же потоке это (по документации) неопределенное поведение, по факту чаще всего это дедлок, или окно с ошибкой вида abort()
+
+### Дедлок и рекурсивный мьютекс
+
+- TO DO
+
+### recursive_mutex
+- можно захватывать несколько раз и столько же раз его нужно освобождать
+
+удобно использовать для случая с рекурсивной функцией, главное, чтобы число входов и выходов было одинаковым с числом захвата и отпускания мьютекса
+
+### shared_mutex 
+- у него есть 2 режима
+1) работа с ним многих потоков (шаред)
+2) когда он принадлежит одному потоку
+RW-MUTEX. Используя этот мьютекс у нас может быть множество читателей одновременно и всего 1 писатель и когда работает этот один писатель, НЕ ДОЛЖНЫ работать ни один читатель и ни один другой писатель
+- У читателей нужно использовать
+shared_lock<shared_mutex> lock(m);
+- У писателей нужно использовать
+unique_lock<shared_mutex> lock(m); (чтобы никто более не мог захватить наш Лок, мы хотим монопольно им владеть, чтобы все остальные подождали пока мы выполним нашу операцию и различим мьютекс)
+```
+mutable shared_mutex m;
+
+GetValue() const {
+  shared_lock<shared_mutex> lock(m);
+retun v; }
+
+SetValue(s) {
+  unique_lock<shared_mutex> lock(m);
+v = s; }
+
+DeleteValue(d) {
+  unique_lock<shared_mutex> lock(m);
+delete d; }
+```
+
 ===================================================================
 
 ### explicit
