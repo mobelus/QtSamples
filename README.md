@@ -2947,6 +2947,8 @@ std::mutex m2;
 t1.join();
 t2.join();
 ```
+
+```	
 // VER_2
 std::unique_lock<std::mutex> lock1(from.m, std::defer_lock);
 std::unique_lock<std::mutex> lock2(to.m, std::defer_lock);
