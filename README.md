@@ -2891,6 +2891,44 @@ https://habr.com/ru/post/443406/
 - 1 поток захватил мьютекс на минуту, 10 других потоков, что пытаются в нее войти, по сути заблокированы
 - 7.2) Держим в критической секции ТОЛЬКО те методы, что МОДИФИЦИРУЮТ данные
 8) ДЕДЛОК - Взятие нескольких блокировок в разном порядке
+```
+std::mutex m1;
+std::mutex m2;
+std::thread t1([&m1, &m2] {
+    m1.lock();  //std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    m2.lock(); 
+    
+    m1.unlock();
+    m2.unlock(); 
+});
+std::thread t2([&m1, &m2] {
+    m2.lock(); std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    m1.lock();
+
+    m2.unlock();
+    m1.unlock(); 
+});
+t1.join();
+t2.join();
+```
+СУТЬ: т1 и т2 работают асинхронно / параллельно / одновременно
+- (1 секунда) Т1 залочил m1, а (1 секунда) Т2 залочил m2, 
+- (2 секунда) Т1 хочет залочить m2, а (2 секунда) Т2 хочет залочить m1
+- Каждый из потоков держит в локе тот мьютекс который нужен другому и они входят в ДЕДЛОК бесконечное ожидание на высвобождение интересующего каждого из них мьютекса
+- НЮАНС - Дедлок может случиться, а может и НЕТ - t1 создастся раньше t2 и может t1 может успеть залочить оба мьютекса и его будет ждать t2, и дедлока не будет, НО это, если повезёт.
+
+- РЕШЕНИЕ: В обоих потоках Залочить мьютексы в ОДИНАКОВОМ порядке
+```
+std::thread t1([&m1, &m2] {
+    m1.lock();
+    m2.lock(); 
+});
+std::thread t2([&m1, &m2] {
+    m1.lock();
+    m2.lock();
+});
+```
+
 - РЕШЕНИЕ_1: std::scoped_lock lock{muA, muB};
 - РЕШЕНИЕ_2: std::timed_mutex, в котором можно указать таймаут, по истечении которого блокировка будет снята, если ресурс не стал доступен.
 - РЕШЕНИЕ_3: std::lock(lock1, lock2); // Передаём НЕ мьютексы, а два юник-лока
@@ -2898,11 +2936,17 @@ https://habr.com/ru/post/443406/
 // VER_1
 std::mutex m1;
 std::mutex m2;
-std::lock_guard<std::mutex> lock1(m1);
-std::lock_guard<std::mutex> lock2(m2);
-// DEADLOCK - ибо m1.lock m2.lock, как выйдем за { } 
-// случится m2.unlock m1.unlock, а НЕ m1.unlock m2.unlock 
-
+ std::thread t1([&m1, &m2] {
+   std::lock_guard<std::mutex> lock1(mu1);
+   std::lock_guard<std::mutex> lock2(mu2);    
+ });
+ std::thread t2([&m1, &m2] {
+   std::lock_guard<std::mutex> lock1(mu2);
+   std::lock_guard<std::mutex> lock2(mu1);    
+ });
+t1.join();
+t2.join();
+```
 // VER_2
 std::unique_lock<std::mutex> lock1(from.m, std::defer_lock);
 std::unique_lock<std::mutex> lock2(to.m, std::defer_lock);
@@ -2934,10 +2978,10 @@ std::lock(lock1, lock2);
 - std::launch::deferred: переданная функция не запускается сразу же, ее запуск откладывается до того как будут произведены вызовы get() или wait() над std::future объектом, который будет возвращен из вызова std::async. В месте вызова этих методов, функция будет выполняться синхронно.
 - Когда мы вызываем std::async() с параметрами по умолчанию, происходит запуск с комбинацией этих двух параметров, что в действительности приводит к непредсказуемому поведению. Существует ряд других сложностей, связанных с использованием std:async() с политикой запуска по умолчанию: 
 - РЕШЕНИЕ: Для избежания всех этих сложностей всегда вызывайте std::async с политикой запуска std::launch::async.
-- КОРОЧЕ: //выполнение функции myFunction используя std::async с политикой запуска по умолчанию **НЕ ДЕЛАЙТЕ ТАК auto myFuture = std::async(myFunction);**
+- КОРОЧЕ: //выполнение функции myFunction используя std::async с политикой запуска по умолчанию 
+- **НЕ ДЕЛАЙТЕ ТАК auto myFuture = std::async(myFunction);**
 - (!!!) Вместо этого **ДЕЛАЙ ВСЕГДА ТАК**: 
-- //выполнение функции myFunction асинхронно
-- **auto myFuture = std::async(std::launch::async, myFunction);**
+- **auto myFuture = std::async(std::launch::async, myFunction);** //выполнение функции myFunction асинхронно
 15) Вызывать метод get() у std::future объекта в блоке кода, время выполнение которого критично
 16) Непонимание того, что исключения, выброшенные внутри асинхронной операции, передадутся в вызывающий поток только при вызове std::future::get()
 - РЕШЕНИЕ std::packaged_task и переместить его в нужный поток выполнения после установки свойств потока.
@@ -2955,7 +2999,7 @@ std::lock(lock1, lock2);
 ### Дополнительно о mutex.lock + mutex.lock
 ДОКУМЕНТАЦИЯ:
 - Locks the mutex. If another thread has already locked the mutex, a call to lock will block execution until the lock is acquired.
-- **(*)** If lock is called by a thread that already owns the mutex, (** mutex.lock + mutex.lock **) this is an **UNDEFINED BEHAVIOR**: for example, the program may deadlock. An implementation that can detect the invalid usage is encouraged to throw a std::system_error with error condition resource_deadlock_would_occur instead of deadlocking.
+- ** (*) ** If lock is called by a thread that already owns the mutex, (** mutex.lock + mutex.lock **) this is an **UNDEFINED BEHAVIOR**: for example, the program may deadlock. An implementation that can detect the invalid usage is encouraged to throw a std::system_error with error condition resource_deadlock_would_occur instead of deadlocking.
 
 ### Дополнительно о std::lock(...Args) - ЕСТЬ В С++11
 ДОКУМЕНТАЦИЯ:
@@ -2965,7 +3009,7 @@ std::lock(lock1, lock2);
 
 ### Дополнительно о std::scoped_lock(...Args) - НЕТ В С++11, только в С++17
 ДОКУМЕНТАЦИЯ:
-- **(*)** Будет сделана в неопределённом порядке **серия вызовов lock-ОВ, try_lock-ОВ, и unlock-ОВ**. Когда результат lock-а или unlock-а свалятся в exception, вызовется дополнительный unlock, чтобы предотваратить дедлок и залочить / разлочить объекты в правильном порядке 
+- ** (*) ** Будет сделана в неопределённом порядке **серия вызовов lock-ОВ, try_lock-ОВ, и unlock-ОВ**. Когда результат lock-а или unlock-а свалятся в exception, вызовется дополнительный unlock, чтобы предотваратить дедлок и залочить / разлочить объекты в правильном порядке 
 - Едиснвтенный минус ЕГО НЕТ В С++11, ОН ЕСТЬ только в С++17, Альтернатива в с++11 это std::lock(...Args)
 
 ### Как защититься от double exception ?
