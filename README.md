@@ -9,16 +9,32 @@
 
 Ответ: std::deque
 
+### QObject не дружит с template<class T> ?
+
+- Для решения и обхода приходится использовать класс-обёртку
+
 QObject и все его подклассы НЕ потоко-безопасные. Не потоко-безопасна вся система отправки/доставки событий. Важно помнить, что event loop может доставлять события в ваш QObject наследник, одновременно с тем как вы будете что-то делать с объектом из другого потока.
 
 - Макрос Q_OBJECT:
--- Механизм сигналов и слотов подключается
-- Если его забыть написать Q_OBJECT, ну получим ошибки компиляции
--- Метод QObject::connect(sender signal reciever slot Connection_Type) и
-- AutoConnection - определяем из какого потока что было вызвано и используем соотвественно либо логику DirectConnection, 
-- DirectConnection - в обход очереди event loop - вызов слота сразу же 
-- QueuedConnection - заблокировать текущий поток, превартить сигнал в событие, отправить в обработку в EventLoop
-- BlockingQueuedConnection - 
+-- QMetaObject
+-- qt_metacall
+-- META_MACROS
+-- Q_MOC_RUN
+-- signals, slots, Q_PROPERTY, и прочее
+-- Если его забыть написать Q_OBJECT, ну получим ошибки компиляции
+
+
+- Метод QObject::connect(sender signal reciever slot Connection_Type)
+
+| Connections                 | Type | Description                                                                               |
+| --------------------------- |:----:|:-----------------------------------------------------------------------------------------:|
+| Qt::DirectConnection        | Sync | сигнал обрабатывается сразу вызовом соответствующего метода слота                         |
+|                             |      | Слот выполняется в потоке отправителя(в том потоке где был выполнен emit)                 |
+| Qt::QueuedConnection        | Async| сигнал преобразуется в событие и ставится в общую очередь event loop для обработки        |
+| Qt::AutoConnection          |Sy/Asy| Qt::DirectC если sender-reciever в ОДНОМ потоке, для РАЗНЫХ — режим Qt::QueuedC (СМ. ТУТ) |
+| Qt::BlockingQueuedConnection| Async| как и QueuedConection но текущий поток блокается пока слот не доставится                  |
+| Qt::UniqueConnection        | -    | Передаётся как флаг " | Qt::UniqueConnection" блочит повторный коннект                    |
+| Qt::UniqueConnection        | -    | одних и тех же сигналов и слотов                                                          |
 
 
 
