@@ -15,13 +15,13 @@
 
 QObject и все его подклассы НЕ потоко-безопасные. Не потоко-безопасна вся система отправки/доставки событий. Важно помнить, что event loop может доставлять события в ваш QObject наследник, одновременно с тем как вы будете что-то делать с объектом из другого потока.
 
-- Макрос Q_OBJECT:
--- QMetaObject
--- qt_metacall
--- META_MACROS
--- Q_MOC_RUN
--- signals, slots, Q_PROPERTY, и прочее
--- Если его забыть написать Q_OBJECT, ну получим ошибки компиляции
+** Макрос Q_OBJECT:**
+- QMetaObject
+- qt_metacall
+- META_MACROS
+- Q_MOC_RUN
+- signals, slots, Q_PROPERTY, и прочее
+- Если его забыть написать Q_OBJECT, ну получим ошибки компиляции
 
 
 - Метод QObject::connect(sender signal reciever slot Connection_Type)
