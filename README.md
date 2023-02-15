@@ -431,9 +431,46 @@ moc работает как препроцессор который преобр
 Если вы используете qmake для создания своих make-файлов, в правила сборки будет включен вызов moc когда это необходимо, поэтому вам не нужно использовать moc непосредственно. Дополнительную информацию по moc смотрите в статье Почему Qt не использует шаблон для сигналов и слотов?
 
 
+### Model View / ModelView в Qt
 	
+- MODEL
+- VIEW
+- DELEGATE
 
+- **МОДЕЛЬ** общается с источником данных, остальным компонентам архитектуры она предоставляет свой интерфейс для взаимодействия
+- **ВЬЮХА** работает с Индексами МОДЕЛИ; ссылки на элементы объекты источника данных. Через индексы Вьюха может влиять на данные в модели и в источнике исходных данных.
+- В стандартной Вьюхе, есть **ДЕЛЕГАТ** который занимается отрисовкой элементов данных. Когда элемент редактируется, Делегат работает с моделью напрямую через её индексы.
+	
+----------------------------------
+- **QAbstractItemModel** - ListModel / TableModel / TreeModel
+- При наследовании от QAbstractItemModel, мы переопределяем как минимум: 
+- **rowCount()**
+- **columnCount()**
+- **index()**
+- **parent()**
+- **data()**
+- For Editing **setData()**
+- For header **headerData()**
 
+- QAbstractListModel
+- QAbstractTableModel
+
+- QAbstractProxyModel - PROXY - для Фильров
+
+- QStringListModel is used to store a simple list of QString items.
+- QStandardItemModel manages more complex tree structures of items, each of which can contain arbitrary data.
+- QFileSystemModel provides information about files and directories in the local filing system.
+SQL
+- QSqlQueryModel
+- QSqlTableModel
+- QSqlRelationalTableModel are used to access databases using model/view conventions.
+----------------------------------
+- QAbstractItemView
+
+- QListView
+- QTreeView
+- QTableView
+----------------------------------
 
 
 # РАЗНОЕ	
