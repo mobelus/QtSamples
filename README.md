@@ -433,17 +433,18 @@ moc работает как препроцессор который преобр
 
 ### Model View / ModelView в Qt
 	
-- MODEL
+- MODEL (QModelIndex)
 - VIEW
 - DELEGATE
 
 - **МОДЕЛЬ** общается с источником данных, остальным компонентам архитектуры она предоставляет свой интерфейс для взаимодействия
-- **ВЬЮХА** работает с Индексами МОДЕЛИ; ссылки на элементы объекты источника данных. Через индексы Вьюха может влиять на данные в модели и в источнике исходных данных.
+- **ВЬЮХА** работает с Индексами (QModelIndex) МОДЕЛИ; ссылки на элементы объекты источника данных. Через индексы Вьюха может влиять на данные в модели и в источнике исходных данных.
 - В стандартной Вьюхе, есть **ДЕЛЕГАТ** который занимается отрисовкой элементов данных. Когда элемент редактируется, Делегат работает с моделью напрямую через её индексы.
 	
 ----------------------------------
-- **QAbstractItemModel** - ListModel / TableModel / TreeModel
-- При наследовании от QAbstractItemModel, мы переопределяем как минимум: 
+**MODELS**
+- QAbstractItemModel -> ListModel / TableModel / TreeModel
+- При наследовании от **QAbstractItemModel**, мы переопределяем как минимум: 
 - **rowCount()**
 - **columnCount()**
 - **index()**
@@ -451,28 +452,32 @@ moc работает как препроцессор который преобр
 - **data()**
 - For Editing **setData()**
 - For header **headerData()**
-
+----------------------------------
 - QAbstractListModel
 - QAbstractTableModel
-
+----------------------------------
 - QAbstractProxyModel - PROXY - для Фильров
-
+----------------------------------
 - QStringListModel is used to store a simple list of QString items.
 - QStandardItemModel manages more complex tree structures of items, each of which can contain arbitrary data.
 - QFileSystemModel provides information about files and directories in the local filing system.
-SQL
+ --- SQL ---
 - QSqlQueryModel
 - QSqlTableModel
 - QSqlRelationalTableModel are used to access databases using model/view conventions.
 ----------------------------------
+**VIEWS**
 - QAbstractItemView
 
 - QListView
-- QTreeView
 - QTableView
+- QTreeView
 ----------------------------------
+**DELEGATES**
+- QAbstractItemDelegate
+- QStyledItemDelegate
 
-
+	
 # РАЗНОЕ	
 
 ### MVC MVP MVVP
