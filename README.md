@@ -1535,7 +1535,7 @@ std::unordered_map<Key,std::string,KeyHasher> m6 = {
 - StackAllocator
 - ArenaAllocator
 
-# STL STL 1
+# STLSTL STL STL 1
 	
 # Типы контейнеров:
 
@@ -1668,7 +1668,7 @@ std::unordered_map<Key,std::string,KeyHasher> m6 = {
 
 # Алгоритмы НЕ могут использоваться со СПИСКАМИ, потому что списки не поддерживают итераторы ПРОИЗВ. доступа.
 
-# STL STL 2
+# STLSTL STL STL 2
 
 ![](Screenshot_1368.png)
 	
