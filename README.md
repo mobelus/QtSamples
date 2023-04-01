@@ -1,3 +1,10 @@
+# QT Code Examples
+
+- QThreadPool:
+    - LargeFileReaderTask - https://itnotesblog.ru/note/qfile-i-qthreadpool-otzyvchivoe-chtenie-fajlov
+
+# QT Code Examples
+
 # QT
 
 
