@@ -3,6 +3,11 @@
 - QThreadPool:
     - LargeFileReaderTask - https://itnotesblog.ru/note/qfile-i-qthreadpool-otzyvchivoe-chtenie-fajlov
 
+- Фабричный метод
+    - https://radioprog.ru/post/1298
+    - http://cpp-reference.ru/patterns/creational-patterns/factory-method/
+    - https://www.cyberforum.ru/cpp-beginners/thread2455988.html
+    
 # QT Code Examples
 
 # QT
