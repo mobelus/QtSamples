@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/">
+        <file>main.qml</file>
+        <file>Root.qml</file>
+        <file>Sub.qml</file>
+    </qresource>
+</RCC>
