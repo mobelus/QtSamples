@@ -7044,8 +7044,21 @@ _______________________->update() --------------------------------------> Observ
 - **Composite** - Lets you compose objects into tree structures and then work with these structures as if they were individual objects.
 - **Prototype** - Lets you copy existing objects without making your code dependent on their classes.
 - **Decorator** - Lets you attach new behaviors to objects by placing these objects inside special wrapper objects that contain the behaviors.
-	
-	
+
+# UML - GANG OF FOUR
+- Häufig auftretende Muster in der Zusammenarbeit von Objekten
+- Ziele: Flexibilität, Wartbarkeit, Kommunikation, Wiederverwendung
+- Zweck - 1 - Creational Patterns Abstrahieren über das Erzeugen von Objekten
+- Zweck - 2 - Structural Patterns Abstrahieren über häufig vorkommende Strukturen
+- Zweck - 3 - Behavioral Patterns Abstrahieren über Verhaltensmuster
+
+- **Ein Klassendiagramm** ist ein Graph mit 1. Knoten: Klassen (Rechtecke) 2. Kanten: Beziehungen zwischen Klassen 3. Kann auch Interfaces, Packages und Instanzen enthalten
+- abstrakte Klassen werden kursiv geschrieben
+- + public, # protected, - private, ~ package
+- inheritance, association (calss_1 -(role)---(role)- class_2)
+
+- inheritance | VEHICLE -- car | FLYING OBJECT -- bird | --- airplane ---
+ 
 ===================================================================
 	
 	
