@@ -3767,11 +3767,11 @@ https://studizba.com/lectures/informatika-i-programmirovanie/lekcii-po-raspredel
 - Решение 1.4: Перезахват через **ТАЙМАУТ попытки Блокировки** - указанное максимально время когда блокировка должна пробовать захватить блокировку, и если перешли границу, то поток отказывается от всех блокировок и начинает цикл перезахвата блокировки заново
 
 - РЕШЕНИЕ 2: **LOCK-FREE Алгоритмы и подходы lock free** -
-2.0 Неблокирующая очередь сообщений | Non blocking Message queue
-2.1 Операции атомарного изменения (RMW, read-modify-write)
-2.2 Циклы Compare-And-Swap (CAS)
-2.3 Последовательная согласованность (sequential consistency)
-2.4 Упорядочение памяти (memory reordering)
+- РЕШЕНИЕ 2.0 Неблокирующая очередь сообщений | Non blocking Message queue - Пример 1: Qt-шный цикл обработки сообщений event loop; Пример 2: WINDOWS Style Gui event dispatching and handling через Event Message Queue
+- РЕШЕНИЕ 2.1 Операции атомарного изменения (RMW, read-modify-write)
+- РЕШЕНИЕ 2.2 Циклы Compare-And-Swap (CAS)
+- РЕШЕНИЕ 2.3 Последовательная согласованность (sequential consistency)
+- РЕШЕНИЕ 2.4 Упорядочение памяти (memory reordering)
 
 2) **Livelock (Активная блокировка) live lock** [Livelock считается подслучаем Starvation]
 - Выполняются операции (потоки), но эти операции не продвигают программу к завершению (бесконечный цикл). Программа не зависла и стоит, а работает, но работает "вхолостую".
