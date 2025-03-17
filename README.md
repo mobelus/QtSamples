@@ -6542,6 +6542,30 @@ split_sv(std::string_view strv, std::string_view delims = " ")
 
 https://mainfunda.com/unique_ptr-auto_ptr/
 
+### palindrome палиндром
+
+bool isPalindrome(string str)
+{
+  int left = 0, right = str.size() - 1;  
+  bool isPal = true; // terminate the loop if mismatch chars found
+  while (left < right) {
+    // If any character not match, break the
+    // loop, string is not palindrome
+    if (str[left] != str[right]) {
+      isPal = false;
+      break;
+    }
+    left++;
+    right--;
+  }
+  return isPal;
+}  
+
+void main() {
+ isPalindrome("ABCDCBA");
+}
+```
+
 ### unique_ptr своими руками
 
 ```
